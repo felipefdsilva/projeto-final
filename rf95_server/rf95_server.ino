@@ -11,6 +11,15 @@
 #include <SPI.h>
 #include <RH_RF95.h>
 
+#define MSG_TYPE_SIZE 3
+#define DEVICE_ID_SIZE 12
+#define COORDINATES_SIZE 32
+#define GROUP_FLAG_SIZE 1
+#define BYTE_SIZE 8
+
+#define LAT_MIN  42900000
+#define LNG_MIN 22380000
+
 // Singleton instance of the radio driver
 RH_RF95 rf95;
 //RH_RF95 rf95(5, 2); // Rocket Scream Mini Ultra Pro with the RFM95W
@@ -18,6 +27,18 @@ RH_RF95 rf95;
 
 // Need this on Arduino Zero with SerialUSB port (eg RocketScream Mini Ultra Pro)
 //#define Serial SerialUSB
+
+int extractField(uint8_t message_byte, unsigned position, unsigned fieldSize){ 
+    return ((message_byte >> (position - 1)) & ((1 << fieldSize) - 1)); 
+}
+long decompress_coordinate(uint8_t coord1, uint8_t coord2, long offset){
+  uint16_t coord;
+  coord = coord1;
+  coord <<= 8;
+  coord += coord2;
+
+  return ((coord + offset)*-1);
+}
 
 int led = 8;
 
@@ -48,20 +69,41 @@ void setup()
 
 void loop()
 {
+  unsigned messageType;
+  unsigned deviceID;
+  double lat, lng;
+
   if (rf95.available())
   {
     // Should be a message for us now   
     uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
     uint8_t len = sizeof(buf);
+    uint8_t groupFlag;
+    
     if (rf95.recv(buf, &len))
     {
       digitalWrite(led, HIGH);
 //      RH_RF95::printBuffer("request: ", buf, len);
       Serial.print("got request: ");
       Serial.println((char*)buf);
-      Message message = processMessage(buf, len);
-      Serial.print("TIPO: ");
-      Serial.println(message.type);
+
+
+      messageType = extractField(buf[0], 1+GROUP_FLAG_SIZE+DEVICE_ID_SIZE-BYTE_SIZE, MSG_TYPE_SIZE);
+      groupFlag = extractField(buf[0], 1+DEVICE_ID_SIZE-BYTE_SIZE, GROUP_FLAG_SIZE);
+      deviceID = (extractField(buf[0], 1, DEVICE_ID_SIZE-BYTE_SIZE)<<8) + (unsigned)buf[1];
+      lat = decompress_coordinate(buf[2], buf[3], LAT_MIN);
+      lng = decompress_coordinate(buf[4], buf[5], LNG_MIN);
+
+      Serial.print("Message Type: ");
+      Serial.println(messageType);
+      Serial.print("Group Flag: ");
+      Serial.println(groupFlag);
+      Serial.print("Device ID: ");
+      Serial.println(deviceID);
+      Serial.print("Latitude: ");
+      Serial.println(lat);
+      Serial.print("Longitude: ");
+      Serial.println(lng);
       
       // Send a reply
       uint8_t data[] = "And hello back to you";

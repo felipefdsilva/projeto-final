@@ -1,16 +1,17 @@
 #include <iostream>
 #include <time.h>
-#include <math.h>       /* pow */
 #include <iomanip>
 #include <vector>
 #include <string.h> //stoi
-//#include "message.h"
 
-#define DEVICE_ID 2
-#define MESSAGE_SIZE 40
+#define DEVICE_ID 4095
+#define MESSAGE_SIZE 48
+#define GROUP_FLAG 0
 
 #define MSG_TYPE_SIZE 3
-#define DEVICE_ID_SIZE 5
+#define DEVICE_ID_SIZE 12
+#define GROUP_FLAG_SIZE 1
+#define BYTE_SIZE 8
 #define COORDINATES_SIZE 32
 
 #define DELTA_MAX_LAT 17001
@@ -21,10 +22,10 @@
 using namespace std;
 
 void splitString (string, char, vector<string> &);
-int generate_coordinate(int, int);
-void compress_coordinate(string, unsigned short []);
-string generate_location ();
-uint8_t append_bits(uint8_t, int, unsigned);
+int generateCoordinate(int, int);
+void compressCoordinate(string, unsigned short []);
+string generateLocation ();
+uint8_t insertField(uint8_t, int, unsigned);
 int extractField(uint8_t, unsigned, unsigned);
 
 void splitString (string str, char delimiter, vector<string> &v){
@@ -39,82 +40,71 @@ void splitString (string str, char delimiter, vector<string> &v){
     v.push_back(str);
 }
 
-int generate_coordinate(int coord_min, int delta_max){
+int generateCoordinate(int coord_min, int delta_max){
 	srand(unsigned(time(NULL)));
 	int rand_num = (rand() % delta_max);
-	cout << "rand num: " << rand_num << endl;
 	return (coord_min + rand_num)*-1; 
 }
 
-void compress_coordinate(string coordinates, unsigned short compressed_coord[]){
+void compressCoordinate(string coordinates, unsigned short compressedCoord[]){
 	vector <string> splited_coord;
 
 	splitString(coordinates, ';', splited_coord);
 
-	compressed_coord[0] = stoi(splited_coord[0])*(-1) - LAT_MIN;
-	compressed_coord[1] = stoi(splited_coord[1])*(-1) - LNG_MIN;
+	compressedCoord[0] = stoi(splited_coord[0])*(-1) - LAT_MIN;
+	compressedCoord[1] = stoi(splited_coord[1])*(-1) - LNG_MIN;
 }
-uint16_t decompress_coordinate(uint8_t coord1, uint8_t coord2){
-	uint16_t coord;
-	
-	coord = coord1;
-	coord <<= 8;
-	coord += coord2; 
-
-	return coord;
+long decompressCoordinate(uint16_t coord, long offset){
+	return (coord + offset)*-1;
 }
 
-string generate_location (){
+string generateLocation (){
 	string location;
 	
-	location += to_string(generate_coordinate(LAT_MIN, DELTA_MAX_LAT));
+	location += to_string(generateCoordinate(LAT_MIN, DELTA_MAX_LAT));
 	location += ';';
-	location += to_string(generate_coordinate(LNG_MIN, DELTA_MAX_LNG));
+	location += to_string(generateCoordinate(LNG_MIN, DELTA_MAX_LNG));
 
 	return location;
 }
 
-uint8_t append_bits(uint8_t message_byte, int appendix, unsigned appendix_size){
-  message_byte <<= appendix_size;
-  message_byte += appendix;
+uint16_t insertField(uint16_t messageChunk, uint16_t field, uint16_t fieldSize){
+  messageChunk <<= fieldSize;
+  messageChunk += field;
 
-  return message_byte;
+  return messageChunk;
 }
 
-int extractField(uint8_t message_byte, unsigned position, unsigned fieldSize){ 
-    return ((message_byte >> (position - 1)) & ((1 << fieldSize) - 1)); 
+uint16_t extractField(uint16_t messageChunk, uint16_t position, uint16_t fieldSize){ 
+    return ((messageChunk >> (position - 1)) & ((1 << fieldSize) - 1)); 
 }
 
 int main (int argc, char **argv){
-	uint8_t message[MESSAGE_SIZE/8];
-	string location = generate_location();
-	unsigned short compressed_coord[2];
-	char messageType = '5';
+	uint16_t message[MESSAGE_SIZE/16];
+	string location = generateLocation();
+	unsigned short compressedCoord[2];
+	uint16_t messageType = 5;
 
-	cout << location << endl;
+	cout << "Coordenada: " << location << endl;
 
 	//Compressing Coordinates
-	compress_coordinate(location, compressed_coord);
-	cout << "delta_lat before transm: " << compressed_coord[0] << endl;
-	cout << "delta_lng before transm: " << compressed_coord[1] << endl;
+	compressCoordinate(location, compressedCoord);
 
-	message[4] = append_bits(message[4], messageType, MSG_TYPE_SIZE);
-	message[4] = append_bits(message[4], DEVICE_ID, DEVICE_ID_SIZE);
-
-	message[3] = (compressed_coord[0] >> 8) & 0xFF;
-	message[2] = compressed_coord[0] & 0xFF;
-	message[1] = (compressed_coord[1] >> 8) & 0xFF;
-	message[0] = compressed_coord[1] & 0xFF;
+	message[2] = insertField(message[2], compressedCoord[1], 16);
+	message[1] = insertField(message[1], compressedCoord[0], 16);
+	message[0] = insertField(message[0], messageType, MSG_TYPE_SIZE);
+	message[0] = insertField(message[0], (uint16_t) GROUP_FLAG, GROUP_FLAG_SIZE);
+	message[0] = insertField(message[0], (uint16_t) DEVICE_ID, DEVICE_ID_SIZE);
 
 	//Transmission
-	cout << "Message to send: " << message << endl;
+	cout << "\nMessage to send: " << message[0] << " " << message[1] << " " << message[2] << endl;
 
 	//Reception
-	cout << "Retrieved Device ID: " << extractField(message[4], 1, DEVICE_ID_SIZE) << endl;
-	cout << "Retrieved Message Type: " << extractField(message[4], 1+DEVICE_ID_SIZE, MSG_TYPE_SIZE) << endl;
-    
-	cout << "Retrieved Latitude: " << (decompress_coordinate(message[3], message[2]) + LAT_MIN)*-1 << endl;
-	cout << "Retrieved Longitude: " << (decompress_coordinate(message[1], message[0]) + LNG_MIN)*-1 << endl;
+	cout << "Retrieved Message Type: " << extractField(message[0], 1+GROUP_FLAG_SIZE+DEVICE_ID_SIZE, MSG_TYPE_SIZE) << endl;
+	cout << "Retrieved Group Flag: " << extractField(message[0], 1+DEVICE_ID_SIZE, GROUP_FLAG_SIZE) << endl;
+	cout << "Retrieved Device ID: " << extractField(message[0], 1, DEVICE_ID_SIZE) << endl;
+	cout << "Retrieved Latitude: " << decompressCoordinate(message[1], LAT_MIN) << endl;
+	cout << "Retrieved Longitude: " << decompressCoordinate(message[2], LNG_MIN) << endl;
 	
 	return 0;
 }

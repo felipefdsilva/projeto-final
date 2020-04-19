@@ -10,6 +10,23 @@
 
 #include <SPI.h>
 #include <RH_RF95.h>
+#include <time.h>
+#include <string.h>
+
+#define DEVICE_ID 4095
+#define MESSAGE_SIZE 48
+#define GROUP_FLAG 0
+
+#define MSG_TYPE_SIZE 3
+#define DEVICE_ID_SIZE 12
+#define COORDINATES_SIZE 32
+#define GROUP_FLAG_SIZE 1
+#define BYTE_SIZE 8
+
+#define DELTA_MAX_LAT 17001
+#define DELTA_MAX_LNG 23001
+#define LAT_MIN  42900000
+#define LNG_MIN 22380000
 
 // Singleton instance of the radio driver
 RH_RF95 rf95;
@@ -19,6 +36,18 @@ RH_RF95 rf95;
 // Need this on Arduino Zero with SerialUSB port (eg RocketScream Mini Ultra Pro)
 //#define Serial SerialUSB
 
+void generate_location (long location[]){
+  location[0] = (LAT_MIN+DELTA_MAX_LAT)*-1;
+  location[1] = (LNG_MIN+DELTA_MAX_LNG)*-1;
+}
+void compress_coordinate(long coordinates[], unsigned short compressedCoord[]){
+  compressedCoord[0] = (coordinates[0]*(-1) - LAT_MIN);
+  compressedCoord[1] = (coordinates[1]*(-1) - LNG_MIN);
+}
+void append_bits(uint8_t *message_byte, int appendix, unsigned appendix_size){
+  *message_byte <<= appendix_size;
+  *message_byte += appendix;
+}
 void setup() 
 {
   // Rocket Scream Mini Ultra Pro with the RFM95W only:
@@ -56,11 +85,40 @@ Tipos de Mensagem:
 
 void loop()
 {
+  uint8_t message[MESSAGE_SIZE/8];
+  long location[2];
+  generate_location(location);
+  unsigned short compressedCoord[2];
+  char messageType = '5';
+
+  Serial.print("Location ");
+  Serial.print(location[0]);
+  Serial.print("; ");
+  Serial.println(location[1]);
+
+  compress_coordinate(location, compressedCoord);
+
+  Serial.print("Crompressed Location ");
+  Serial.print(compressedCoord[0]);
+  Serial.print("; ");
+  Serial.println(compressedCoord[1]);
+
+  append_bits(&message[5], (int) (compressedCoord[1] & 0xFF), BYTE_SIZE);
+  append_bits(&message[4], (int) ((compressedCoord[1] >> 8) & 0xFF), BYTE_SIZE);
+  append_bits(&message[3], (int) (compressedCoord[0] & 0xFF), BYTE_SIZE);
+  append_bits(&message[2], (int) ((compressedCoord[0] >> 8) & 0xFF), BYTE_SIZE);
+  append_bits(&message[1], (int) (DEVICE_ID & 0xFF), BYTE_SIZE);
+  append_bits(&message[0], messageType, MSG_TYPE_SIZE);
+  append_bits(&message[0], GROUP_FLAG, GROUP_FLAG_SIZE);
+  append_bits(&message[0], (int) ((DEVICE_ID >> BYTE_SIZE) & 0x0F), DEVICE_ID_SIZE-BYTE_SIZE);
+
+  //Transmission
+  Serial.print("Message to send: ");
+  Serial.println((char*)message);
   Serial.println("Sending Beacon");
   // Send a message to rf95_server
-  uint8_t data[] = "101-22.800654-43.200297";
-  Serial.println(sizeof(data));
-  rf95.send(data, sizeof(data));
+  Serial.println(sizeof(message));
+  rf95.send(message, sizeof(message));
   rf95.waitPacketSent();
   Serial.println("Packet sent!");
   // Now wait for a reply
