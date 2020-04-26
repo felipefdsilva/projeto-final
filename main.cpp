@@ -4,6 +4,8 @@
 #include <vector>
 #include <string.h> //stoi
 
+#define OK	0
+
 #define DEVICE_ID 4095
 #define MESSAGE_SIZE 48
 #define GROUP_FLAG 0
@@ -11,8 +13,6 @@
 #define MSG_TYPE_SIZE 3
 #define DEVICE_ID_SIZE 12
 #define GROUP_FLAG_SIZE 1
-#define BYTE_SIZE 8
-#define COORDINATES_SIZE 32
 
 #define DELTA_MAX_LAT 17001
 #define DELTA_MAX_LNG 23001
@@ -54,6 +54,7 @@ void compressCoordinate(string coordinates, unsigned short compressedCoord[]){
 	compressedCoord[0] = stoi(splited_coord[0])*(-1) - LAT_MIN;
 	compressedCoord[1] = stoi(splited_coord[1])*(-1) - LNG_MIN;
 }
+
 long decompressCoordinate(uint16_t coord, long offset){
 	return (coord + offset)*-1;
 }
@@ -68,16 +69,19 @@ string generateLocation (){
 	return location;
 }
 
-uint16_t insertField(uint16_t messageChunk, uint16_t field, uint16_t fieldSize){
-  messageChunk <<= fieldSize;
-  messageChunk += field;
-
-  return messageChunk;
+void insertField(uint16_t *messageChunk, uint16_t field, uint16_t fieldSize){
+  *messageChunk <<= fieldSize;
+  *messageChunk += field;
 }
 
-uint16_t extractField(uint16_t messageChunk, uint16_t position, uint16_t fieldSize){ 
-    return ((messageChunk >> (position - 1)) & ((1 << fieldSize) - 1)); 
+uint16_t extractField(uint16_t *messageChunk, uint16_t fieldSize){
+	uint16_t value;
+	value = *messageChunk & ((1 << fieldSize)-1);
+	*messageChunk >>= fieldSize;
+	return value;
 }
+
+generateBeacon(&message, Fields *, fieldCount)
 
 int main (int argc, char **argv){
 	uint16_t message[MESSAGE_SIZE/16];
@@ -90,21 +94,21 @@ int main (int argc, char **argv){
 	//Compressing Coordinates
 	compressCoordinate(location, compressedCoord);
 
-	message[2] = insertField(message[2], compressedCoord[1], 16);
-	message[1] = insertField(message[1], compressedCoord[0], 16);
-	message[0] = insertField(message[0], messageType, MSG_TYPE_SIZE);
-	message[0] = insertField(message[0], (uint16_t) GROUP_FLAG, GROUP_FLAG_SIZE);
-	message[0] = insertField(message[0], (uint16_t) DEVICE_ID, DEVICE_ID_SIZE);
+	insertField(&message[0], messageType, MSG_TYPE_SIZE);
+	insertField(&message[0], (uint16_t) GROUP_FLAG, GROUP_FLAG_SIZE);
+	insertField(&message[0], (uint16_t) DEVICE_ID, DEVICE_ID_SIZE);
+	insertField(&message[1], compressedCoord[0], 16);
+	insertField(&message[2], compressedCoord[1], 16);
 
 	//Transmission
 	cout << "\nMessage to send: " << message[0] << " " << message[1] << " " << message[2] << endl;
 
 	//Reception
-	cout << "Retrieved Message Type: " << extractField(message[0], 1+GROUP_FLAG_SIZE+DEVICE_ID_SIZE, MSG_TYPE_SIZE) << endl;
-	cout << "Retrieved Group Flag: " << extractField(message[0], 1+DEVICE_ID_SIZE, GROUP_FLAG_SIZE) << endl;
-	cout << "Retrieved Device ID: " << extractField(message[0], 1, DEVICE_ID_SIZE) << endl;
+	cout << "Retrieved Device ID: " << extractField(&message[0], DEVICE_ID_SIZE) << endl;
+	cout << "Retrieved Group Flag: " << extractField(&message[0], GROUP_FLAG_SIZE) << endl;
+	cout << "Retrieved Message Type: " << extractField(&message[0], MSG_TYPE_SIZE) << endl;
 	cout << "Retrieved Latitude: " << decompressCoordinate(message[1], LAT_MIN) << endl;
 	cout << "Retrieved Longitude: " << decompressCoordinate(message[2], LNG_MIN) << endl;
 	
-	return 0;
+	return OK;
 }
