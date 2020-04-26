@@ -1,17 +1,21 @@
 #ifndef _FIELD_H_
 #define _FIELD_H_ "field.h"
 
+#include <iostream>
+
 class Field{
     public:
-        Field(char);
-        uint16_t getFieldSize();
-        uint16_t getFieldValue();
-        uint16_t insert(uint16_t);
-        uint16_t extract(uint16_t, uint16_t);
+        Field();
+        Field(uint8_t, uint16_t = 0);
+        void setSize(uint8_t);
+        void setValue(uint16_t);
+        uint16_t getSize();
+        uint16_t getValue();
+        void insert(uint16_t *);
+        uint16_t extract(uint16_t *);
     private:
-        char pType;
-        uint16_t size;
-        uint16_t value;
+        uint8_t pSize;
+        uint16_t pValue;
 };
 
 #endif

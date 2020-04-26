@@ -1,114 +1,76 @@
 #include <iostream>
-#include <time.h>
 #include <iomanip>
-#include <vector>
-#include <string.h> //stoi
+#include <string>
+#include "field.h"
+#include "coordinate.h"
 
 #define OK	0
 
+#define GROUP_FLAG 1
 #define DEVICE_ID 4095
-#define MESSAGE_SIZE 48
-#define GROUP_FLAG 0
 
+#define BATTERY_SIZE 4
+#define MESSAGE_SIZE 32
 #define MSG_TYPE_SIZE 3
 #define DEVICE_ID_SIZE 12
 #define GROUP_FLAG_SIZE 1
 
-#define DELTA_MAX_LAT 17001
-#define DELTA_MAX_LNG 23001
-#define LAT_MIN	42900000
-#define LNG_MIN 22380000
-
 using namespace std;
 
-void splitString (string, char, vector<string> &);
-int generateCoordinate(int, int);
-void compressCoordinate(string, unsigned short []);
-string generateLocation ();
-uint8_t insertField(uint8_t, int, unsigned);
-int extractField(uint8_t, unsigned, unsigned);
+void generateMessage(uint16_t *message, unsigned messageSize, Field *fields, unsigned fieldCount){
+	unsigned sumOfSizes = 0;
+	unsigned j = 0;
 
-void splitString (string str, char delimiter, vector<string> &v){
-  unsigned position = str.find(delimiter);
-
-  while (position < str.size()){
-    v.push_back(str.substr(0, position));
-    str.erase(0, position+1);//+delimiter.size());
-    position = str.find(delimiter);
-  }
-  if (str.size())
-    v.push_back(str);
+	for (unsigned i = 0; i < messageSize; i++){
+		while (sumOfSizes < 16){
+			sumOfSizes += fields[j].getSize();
+			fields[j].insert(message+i);
+			j++;
+		}
+		sumOfSizes = 0;
+	}
 }
-
-int generateCoordinate(int coord_min, int delta_max){
-	srand(unsigned(time(NULL)));
-	int rand_num = (rand() % delta_max);
-	return (coord_min + rand_num)*-1; 
-}
-
-void compressCoordinate(string coordinates, unsigned short compressedCoord[]){
-	vector <string> splited_coord;
-
-	splitString(coordinates, ';', splited_coord);
-
-	compressedCoord[0] = stoi(splited_coord[0])*(-1) - LAT_MIN;
-	compressedCoord[1] = stoi(splited_coord[1])*(-1) - LNG_MIN;
-}
-
-long decompressCoordinate(uint16_t coord, long offset){
-	return (coord + offset)*-1;
-}
-
-string generateLocation (){
-	string location;
-	
-	location += to_string(generateCoordinate(LAT_MIN, DELTA_MAX_LAT));
-	location += ';';
-	location += to_string(generateCoordinate(LNG_MIN, DELTA_MAX_LNG));
-
-	return location;
-}
-
-void insertField(uint16_t *messageChunk, uint16_t field, uint16_t fieldSize){
-  *messageChunk <<= fieldSize;
-  *messageChunk += field;
-}
-
-uint16_t extractField(uint16_t *messageChunk, uint16_t fieldSize){
-	uint16_t value;
-	value = *messageChunk & ((1 << fieldSize)-1);
-	*messageChunk >>= fieldSize;
-	return value;
-}
-
-generateBeacon(&message, Fields *, fieldCount)
 
 int main (int argc, char **argv){
 	uint16_t message[MESSAGE_SIZE/16];
-	string location = generateLocation();
-	unsigned short compressedCoord[2];
+	//unsigned short compressedCoord[2];
 	uint16_t messageType = 5;
-
-	cout << "Coordenada: " << location << endl;
+	uint8_t fieldCount = 0;
+	
+	//string location = generateLocation();
+	//cout << "Coordenada: " << location << endl;
 
 	//Compressing Coordinates
-	compressCoordinate(location, compressedCoord);
+	//compressCoordinate(location, compressedCoord);
 
-	insertField(&message[0], messageType, MSG_TYPE_SIZE);
-	insertField(&message[0], (uint16_t) GROUP_FLAG, GROUP_FLAG_SIZE);
-	insertField(&message[0], (uint16_t) DEVICE_ID, DEVICE_ID_SIZE);
-	insertField(&message[1], compressedCoord[0], 16);
-	insertField(&message[2], compressedCoord[1], 16);
+	// TODO: improve this code
+	uint8_t sizes []= {3, 1, 12, 4, 12};
+	uint16_t values[] = {messageType, GROUP_FLAG, DEVICE_ID, 15, 0};
+	fieldCount = 5;
+	Field fields[fieldCount];
+
+	for (unsigned i=0; i < fieldCount; i++){
+		fields[i].setSize(sizes[i]);
+		fields[i].setValue(values[i]);
+	}
+	// TODO: end
+	generateMessage(message, MESSAGE_SIZE/16, fields, fieldCount);
 
 	//Transmission
-	cout << "\nMessage to send: " << message[0] << " " << message[1] << " " << message[2] << endl;
+	cout << "\nMessage to send: ";
+	for (unsigned i=0; i<MESSAGE_SIZE/16;i++){
+		cout << message[i] << " ";
+	}
+	cout << endl;
 
 	//Reception
-	cout << "Retrieved Device ID: " << extractField(&message[0], DEVICE_ID_SIZE) << endl;
-	cout << "Retrieved Group Flag: " << extractField(&message[0], GROUP_FLAG_SIZE) << endl;
-	cout << "Retrieved Message Type: " << extractField(&message[0], MSG_TYPE_SIZE) << endl;
-	cout << "Retrieved Latitude: " << decompressCoordinate(message[1], LAT_MIN) << endl;
-	cout << "Retrieved Longitude: " << decompressCoordinate(message[2], LNG_MIN) << endl;
+	cout << "Retrieved Device ID: " << Field(DEVICE_ID_SIZE).extract(&message[0]) << endl;
+	cout << "Retrieved Group Flag: " << Field(GROUP_FLAG_SIZE).extract(&message[0]) << endl;
+	cout << "Retrieved Message Type: " << Field(MSG_TYPE_SIZE).extract(&message[0]) << endl;
+	cout << "Retrieved Padding: " << Field(12).extract(&message[1]) << endl;
+	cout << "Retrieved Battery: " << Field(BATTERY_SIZE).extract(&message[1]) << endl;
+	//cout << "Retrieved Latitude: " << decompressCoordinate(message[1], LAT_MIN) << endl;
+	//cout << "Retrieved Longitude: " << decompressCoordinate(message[2], LNG_MIN) << endl;
 	
 	return OK;
 }

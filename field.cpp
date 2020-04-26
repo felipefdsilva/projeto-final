@@ -1,59 +1,30 @@
 #include "field.h"
 #include <iostream>
 
-Field::Field(char type){
-    pType = type;
+Field::Field(){}
 
-    switch(type){
-        case 'a': // Lider de grupo
-            size = 1;
-            break;
-        case 'b': // Canal 
-            size = 2;
-            break;
-        case 'c': // type 
-            size = 3;
-            break;
-        case 'd': // Bateria
-            size = 4;
-            break;
-        case 'e': // Help Flag
-            size = 4;
-            break;
-        case 'f': // Hop Count
-            size = 4;
-            break;
-        case 'g': // Máximo de registros
-            size = 10;
-            break;
-        case 'h': // ID
-            size = 12;
-            break;
-        case 'i': // Record Time
-            size = 16;
-            break;
-        case 'j': // Location Time
-            size = 16;
-            break;
-        case 'k': // Latitude
-            size = 16;
-            break;
-        case 'l': // Longitude
-            size = 16;
-            break;
-    }
+Field::Field(uint8_t size, uint16_t value){
+    pSize = size;
+    pValue = value;
 }
-uint16_t Field::getFieldSize(){
-    return size;
+void Field::setSize(uint8_t size){
+    pSize = size;
 }
-uint16_t Field::getFieldValue(){
-    return value;
+void Field::setValue(uint16_t value){
+    pValue = value;
 }
-uint16_t Field::insert(uint16_t messageChunk){
-  messageChunk <<= this->size;
-  messageChunk += this->value;
-  return messageChunk;
+uint16_t Field::getSize(){
+    return pSize;
 }
-uint16_t Field::extract(uint16_t messageChunk, uint16_t position){
-    return ((messageChunk >> (position - 1)) & ((1 << this->size) - 1)); 
+uint16_t Field::getValue(){
+    return pValue;
+}
+void Field::insert(uint16_t *messageChunk){
+  *messageChunk <<= this->pSize;
+  *messageChunk += this->pValue;
+}
+uint16_t Field::extract(uint16_t *messageChunk){
+	pValue = *messageChunk & ((1 << this->pSize)-1);
+	*messageChunk >>= this->pSize;
+	return pValue;
 }
