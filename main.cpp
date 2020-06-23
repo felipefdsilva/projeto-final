@@ -3,8 +3,13 @@
 #include <string>
 #include "field.h"
 #include "coordinate.h"
+#include <ctime>
+//para o relógio do arduino//
+//#include <RTC.h> 
 
 #define OK	0
+
+#define UTC -3
 
 #define GROUP_FLAG 1
 #define DEVICE_ID 4095
@@ -16,6 +21,23 @@
 #define GROUP_FLAG_SIZE 1
 
 using namespace std;
+
+/*para sincronizar o relógio do arduio: talvez precise de modificações
+void updateClock(uint8_t hours, uint8_t minutes, uint8_t seconds){
+	setTime(hours, minutes, seconds)
+}*/
+
+uint16_t time_in_seconds(){
+	//ARDUINO:
+	//return getHour() * 3600 + getMinutes() * 60 + getSeconds()
+	//PC:
+	time_t rawtime;
+	struct tm *ptm;
+
+	time(&rawtime);
+	ptm = gmtime(&rawtime);
+	return (ptm->tm_hour+UTC)%24 * 3600 + ptm->tm_min * 60 +  ptm->tm_sec;
+}
 
 void generateMessage(uint16_t *message, unsigned messageSize, Field *fields, unsigned fieldCount){
 	unsigned sumOfSizes = 0;
@@ -36,6 +58,8 @@ int main (int argc, char **argv){
 	//unsigned short compressedCoord[2];
 	uint16_t messageType = 5;
 	uint8_t fieldCount = 0;
+	cout << time_in_seconds() << endl;
+	exit(1);
 	
 	//string location = generateLocation();
 	//cout << "Coordenada: " << location << endl;

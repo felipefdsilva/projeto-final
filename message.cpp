@@ -3,7 +3,9 @@
 * Felipe Ferreira
 * Fev/2020
 */
-#include <Arduino.h>
+// ! este código está desatualizado - não roda!
+
+//#include <Arduino.h>
 #include "message.h"
 
 using namespace std;
