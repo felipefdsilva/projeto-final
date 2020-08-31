@@ -1,7 +1,7 @@
 #ifndef _FIELD_H_
 #define _FIELD_H_ "field.h"
 
-#include <iostream>
+#include <stdint.h>
 
 class Field{
     public:

@@ -12,6 +12,7 @@
 #include <RH_RF95.h>
 #include <time.h>
 #include <string.h>
+#include <RTCZero.h>
 
 #define DEVICE_ID 4095
 #define MESSAGE_SIZE 48
@@ -28,6 +29,49 @@
 #define LAT_MIN  42900000
 #define LNG_MIN 22380000
 
+class Field{
+    public:
+        Field();
+        Field(uint8_t, uint16_t = 0);
+        void setSize(uint8_t);
+        void setValue(uint16_t);
+        uint16_t getSize();
+        uint16_t getValue();
+        void insert(uint16_t *);
+        uint16_t extract(uint16_t *);
+    private:
+        uint8_t pSize;
+        uint16_t pValue;
+};
+
+Field::Field(){}
+
+Field::Field(uint8_t size, uint16_t value){
+    pSize = size;
+    pValue = value;
+}
+void Field::setSize(uint8_t size){
+    pSize = size;
+}
+void Field::setValue(uint16_t value){
+    pValue = value;
+}
+uint16_t Field::getSize(){
+    return pSize;
+}
+uint16_t Field::getValue(){
+    return pValue;
+}
+void Field::insert(uint16_t *messageChunk){
+  *messageChunk <<= this->pSize;
+  *messageChunk += this->pValue;
+}
+uint16_t Field::extract(uint16_t *messageChunk){
+  pValue = *messageChunk & ((1 << this->pSize)-1);
+  *messageChunk >>= this->pSize;
+  return pValue;
+}
+
 // Singleton instance of the radio driver
 RH_RF95 rf95;
 //RH_RF95 rf95(5, 2); // Rocket Scream Mini Ultra Pro with the RFM95W
@@ -36,18 +80,38 @@ RH_RF95 rf95;
 // Need this on Arduino Zero with SerialUSB port (eg RocketScream Mini Ultra Pro)
 //#define Serial SerialUSB
 
-void generate_location (long location[]){
+void generateLocation (long location[]){
   location[0] = (LAT_MIN+DELTA_MAX_LAT)*-1;
   location[1] = (LNG_MIN+DELTA_MAX_LNG)*-1;
 }
-void compress_coordinate(long coordinates[], unsigned short compressedCoord[]){
+void compressCoordinate(long coordinates[], unsigned short compressedCoord[]){
   compressedCoord[0] = (coordinates[0]*(-1) - LAT_MIN);
   compressedCoord[1] = (coordinates[1]*(-1) - LNG_MIN);
 }
-void append_bits(uint8_t *message_byte, int appendix, unsigned appendix_size){
-  *message_byte <<= appendix_size;
-  *message_byte += appendix;
+void appendBits(uint8_t *messageByte, int appendix, unsigned appendixSize){
+  *messageByte <<= appendixSize;
+  *messageByte += appendix;
 }
+void updateClock(uint8_t hours, uint8_t minutes, uint8_t seconds){
+  setTime(hours, minutes, seconds);
+}
+uint16_t timeInSeconds(){
+  return getHour() * 3600 + getMinutes() * 60 + getSeconds();
+}
+void generateMessage(uint16_t *message, unsigned messageSize, Field *fields){
+  unsigned sumOfSizes = 0;
+  unsigned j = 0;
+
+  for (unsigned i = 0; i < messageSize; i++){
+    while (sumOfSizes < 16){
+      sumOfSizes += fields[j].getSize();
+      fields[j].insert(message+i);
+      j++;
+    }
+    sumOfSizes = 0;
+  }
+}
+
 void setup() 
 {
   // Rocket Scream Mini Ultra Pro with the RFM95W only:
@@ -87,7 +151,7 @@ void loop()
 {
   uint8_t message[MESSAGE_SIZE/8];
   long location[2];
-  generate_location(location);
+  generateLocation(location);
   unsigned short compressedCoord[2];
   char messageType = '5';
 
@@ -96,7 +160,7 @@ void loop()
   Serial.print("; ");
   Serial.println(location[1]);
 
-  compress_coordinate(location, compressedCoord);
+  compressCoordinate(location, compressedCoord);
 
   Serial.print("Crompressed Location ");
   Serial.print(compressedCoord[0]);
