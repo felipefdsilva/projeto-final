@@ -5,7 +5,6 @@
 
 #include <stdint.h>
 
-
 class Field{
     public:
         Field();

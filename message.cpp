@@ -3,9 +3,8 @@
 * Felipe Ferreira
 * Set/2020
 */
-//#include <Arduino.h>
 #include "message.h"
-#include <iostream>
+//#include <iostream>
 
 using namespace std;
 
@@ -161,6 +160,7 @@ Field *Message::getFields(){
 unsigned Message::getFieldCount(){
     return pFieldCount;
 }
+/*
 void Message::printMessage(){
     for (unsigned i = 0; i < this->getMessageSize(); i++){
 		cout << this->getMessage()[i] << " ";
@@ -173,3 +173,4 @@ void Message::printFieldValues(){
 	}
 	cout << endl;
 }
+*/
