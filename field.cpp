@@ -1,6 +1,8 @@
 #include "field.h"
 #include <iostream>
 
+using namespace std;
+
 Field::Field(){}
 
 Field::Field(uint8_t size, uint16_t value){
@@ -24,7 +26,11 @@ void Field::insert(uint16_t *messageChunk){
   *messageChunk += this->pValue;
 }
 uint16_t Field::extract(uint16_t *messageChunk){
-	pValue = *messageChunk & ((1 << this->pSize)-1);
-	*messageChunk >>= this->pSize;
+    unsigned positon = TWO_BYTES - this->getSize(); //to get k MSB bits, extract from 16 to position
+    unsigned k_MSBs = ~((1 << positon)-1); //Example: 001 << 2 is 100. Then, 100 - 001 is 011. The complement is then 100.
+	
+    pValue = *messageChunk & k_MSBs;
+    pValue >>= positon; //return value to begining of byte
+	*messageChunk <<= this->getSize();
 	return pValue;
 }

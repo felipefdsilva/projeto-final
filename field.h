@@ -1,7 +1,10 @@
 #ifndef _FIELD_H_
 #define _FIELD_H_ "field.h"
 
+#define TWO_BYTES 16
+
 #include <stdint.h>
+
 
 class Field{
     public:
