@@ -32,8 +32,8 @@ class Message{
         ~Message();
         void generateMessage();
         void readMessage();
-        uint16_t *getMessage();
-        void setMessage(uint16_t *message);
+        uint8_t *getMessage();
+        void setMessage(uint8_t *message);
         unsigned getMessageSize();
         Field *getFields();
         unsigned getFieldCount();
@@ -43,7 +43,8 @@ class Message{
         Field *pFields;
         unsigned pFieldCount;
         uint16_t *pMessage;
-        unsigned pMessageSize; //in bytes*2
+        uint8_t *pByteMessage;
+        unsigned pMessageSize; //in BYTE_SIZE*2
 };
 
 #endif
