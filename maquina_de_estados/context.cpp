@@ -1,52 +1,60 @@
 #include "context.h"
-
-TerminalState::TerminalState(TerminalMachine &terminalMachine){
-    this->setTerminalMachine(terminalMachine);
-}
-
-void TerminalState::setTerminalMachine(TerminalMachine &terminalMachine){
-    pTerminalMachine = terminalMachine;
-}
-
-TerminalMachine TerminalState::getTerminalMachine(){
-    return pTerminalMachine;
-}
+#include "concrete_states.h"
 
 TerminalMachine::TerminalMachine(){
-    this->listeningBeacons = new ListeningBeacons(*this);
-    //Fazer todos os outros estados concretos
-    this->changeState(this->listeningBeacons);
-    this->run();
+    listeningBeacons = new ListeningBeaconsState(this);
+    sendingBeacons = new SendingBeaconsState(this);
+    acceptTransmission = new AcceptTransmissionState(this);
+    requestTransmission = new RequestTransmissionState(this);
+    sendData = new SendDataState(this);
+    waitTransmissionRequest = new WaitTransmissionState(this);
+    savingData = new SavingDataState(this);
+
+    setStateToListeningBeacons();
+    run();
 }
 
-char * TerminalMachine::listen(){
-    return "AMANHÃ VAI!!!!!";
+TerminalMachine::~TerminalMachine(){
+    delete listeningBeacons;
+    delete sendingBeacons;
+    delete acceptTransmission;
+    delete requestTransmission;
+    delete sendData;
+    delete waitTransmissionRequest;
+    delete savingData;
+}
+void TerminalMachine::setStateToListeningBeacons(){
+    pCurrentState = listeningBeacons;
+}
+
+void TerminalMachine::setStateToSendingBeacons(){
+    pCurrentState = sendingBeacons;
+}
+
+void TerminalMachine::setStateToAcceptTransmission(){
+    pCurrentState = acceptTransmission;
+}
+
+void TerminalMachine::setStateToRequestTransmission(){
+    pCurrentState = requestTransmission;
+}
+
+void TerminalMachine::setStateToSendData(){
+    pCurrentState = sendData;
+}
+
+void TerminalMachine::setStateToWaitTransmissionRequest(){
+    pCurrentState = waitTransmissionRequest;
+}
+
+void TerminalMachine::setStateToSavingData(){
+    pCurrentState = savingData;
+}
+
+TerminalState *TerminalMachine::getCurrentState(){
+    return pCurrentState;
 }
 
 void TerminalMachine::run(){
-    pCurrentState.run();
-}
-
-ListeningBeacons::ListeningBeacons(TerminalMachine &terminalMachine):TerminalState(terminalMachine){
-    this->setTerminalMachine(terminalMachine);
-}
-
-void ListeningBeacons::run(){
-    unsigned period = 100;
-    unsigned t = 0;
-    char *hasMessage;
-    
-    while (t < period){
-        hasMessage = getTerminalMachine().listen();
-        t++;
-
-        if (hasMessage){
-            getTerminalMachine().changeState(new RequestTransmission(getTerminalMachine()));
-            getTerminalMachine().run();
-            return;
-        }
-    }
-    getTerminalMachine().changeState(new SendingBeacons(getTerminalMachine()));
-    getTerminalMachine().run();
-    return;
+    pCurrentState->run();
 }
