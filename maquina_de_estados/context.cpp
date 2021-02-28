@@ -11,7 +11,8 @@ TerminalMachine::TerminalMachine(){
     savingData = new SavingDataState(this);
 
     setStateToListeningBeacons();
-    run();
+    char **argv;
+    run(argv);
 }
 
 TerminalMachine::~TerminalMachine(){

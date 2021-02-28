@@ -27,7 +27,7 @@ char *ListeningBeaconsState::listen(){
     return NULL;
 }
 
-void ListeningBeaconsState::run(){
+void ListeningBeaconsState::run(argv){
     Message beaconMessage(TERMINAL_BEACON);
     unsigned period = 100;
     unsigned t = 0;

@@ -7,43 +7,43 @@ class ListeningBeaconsState: public TerminalState{
     public:
         ListeningBeaconsState(TerminalMachine *);
         char *listen();
-        void run();
+        void run(char **);
 };
 
 class SendingBeaconsState: public TerminalState{
     public:
         SendingBeaconsState(TerminalMachine *);
-        void run();
+        void run(char **);
 };
 
 class AcceptTransmissionState: public TerminalState{
     public:
         AcceptTransmissionState(TerminalMachine *);
-        void run();
+        void run(char **);
 };
 
 class RequestTransmissionState: public TerminalState{
     public:
         RequestTransmissionState(TerminalMachine *);
-        void run();
+        void run(char **);
 };
 
 class SendDataState: public TerminalState{
     public:
         SendDataState(TerminalMachine *);
-        void run();
+        void run(char **);
 };
 
 class WaitTransmissionState: public TerminalState{
     public:
         WaitTransmissionState(TerminalMachine *);
-        void run();
+        void run(char **);
 };
 
 class SavingDataState: public TerminalState{
     public:
         SavingDataState(TerminalMachine *);
-        void run();
+        void run(char **);
 };
 
 #endif
