@@ -55,6 +55,6 @@ TerminalState *TerminalMachine::getCurrentState(){
     return pCurrentState;
 }
 
-void TerminalMachine::run(){
-    pCurrentState->run();
+void TerminalMachine::run(char **argv){
+    pCurrentState->run(argv);
 }

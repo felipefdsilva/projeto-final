@@ -6,7 +6,7 @@ class TerminalState{
         ~TerminalState();
         TerminalMachine getTerminalMachine();
         void setTerminalMachine(TerminalMachine *);
-        virtual void run() = 0;
+        virtual void run(char **) = 0;
     
     private:
         TerminalMachine *pTerminalMachine;

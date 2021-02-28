@@ -15,7 +15,7 @@ class TerminalMachine{
         void setStateToWaitTransmissionRequest();
         void setStateToSavingData();
         TerminalState *getCurrentState();
-        void run();
+        void run(char **);
 
     private:
         TerminalState *pCurrentState;
