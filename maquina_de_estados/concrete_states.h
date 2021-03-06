@@ -14,6 +14,8 @@ class SendingBeaconsState: public TerminalState{
     public:
         SendingBeaconsState(TerminalMachine *);
         void run(char **);
+        void speak();
+        char *listen();
 };
 
 class AcceptTransmissionState: public TerminalState{
