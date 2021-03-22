@@ -12,7 +12,6 @@ ListeningBeaconsState::ListeningBeaconsState(TerminalMachine *terminalMachine){
 
 char *ListeningBeaconsState::listen(){
 	if (rf95.available()){
-		// Should be a message for us now   
 		uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
 		uint8_t len = sizeof(buf);
 
@@ -27,7 +26,7 @@ char *ListeningBeaconsState::listen(){
     return NULL;
 }
 
-void ListeningBeaconsState::run(argv){
+void ListeningBeaconsState::run(){
     Message beaconMessage(TERMINAL_BEACON);
     //TODO: Implementar periodo em intervalo de tempo
     unsigned period = 100;
@@ -42,12 +41,12 @@ void ListeningBeaconsState::run(argv){
 			uint16_t messageType = Field(MSG_TYPE_SIZE).extract(&messageChunk);
 
             if (messageType == TERMINAL_BEACON){
-                beaconMessage.setMessage(message);
-                beaconMessage.readMessage();
+                beaconMessage.saveMessageAsBytes(message);
+                beaconMessage.convertMessageBytesInFields();
 
                 uint16_t terminal_id = beaconMessage().getFields()[2].getValue();
 
-                getTerminalMachine().setStateToRequestTransmission();
+                getTerminalMachine().setStateToSendParameters();
                 getTerminalMachine().run({(char *)terminal_id});
                 return;
             }
@@ -140,7 +139,7 @@ void SendingBeaconsState::run(){
     //TODO: COMO VOLTAR PARA O INICIO?
 }
 
-AcceptTransmissionState::AcceptTransmissionState(TerminalMachine *terminalMachine){
+ReceiveParametersState::ReceiveParametersState(TerminalMachine *terminalMachine){
     this->setTerminalMachine(terminalMachine);
 }
 
@@ -148,36 +147,28 @@ void AcceptTransmissionState::run(){
 //TODO: Implement this
 }
 
-RequestTransmissionState::RequestTransmissionState(TerminalMachine *terminalMachine){
+SendParametersState::SendParametersState(TerminalMachine *terminalMachine){
     this->setTerminalMachine(terminalMachine);
 }
 
-void RequestTransmissionState::run(char **argv){
+void SendParametersState::run(char **argv){
     terminal_id = (uint16_t) argv[0];
     //TODO: Implement this
 }
 
-SendDataState::SendDataState(TerminalMachine *terminalMachine){
+SaveRecordsState::SaveRecordsState(TerminalMachine *terminalMachine){
     this->setTerminalMachine(terminalMachine);
 }
 
-void SendDataState::run(){
+void SaveRecordsState::run(){
 //TODO: Implement this
 }
 
-WaitTransmissionState::WaitTransmissionState(TerminalMachine *terminalMachine){
+SendRecordsState::SendRecordsState(TerminalMachine *terminalMachine){
     this->setTerminalMachine(terminalMachine);
 }
 
-void WaitTransmissionState::run(){
-//TODO: Implement this
-}
-
-SavingDataState::SavingDataState(TerminalMachine *terminalMachine){
-    this->setTerminalMachine(terminalMachine);
-}
-
-void SavingDataState::run(){
+void SendRecordsState::run(){
  //TODO: Implement this
 }
 

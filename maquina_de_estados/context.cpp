@@ -4,15 +4,14 @@
 TerminalMachine::TerminalMachine(){
     listeningBeacons = new ListeningBeaconsState(this);
     sendingBeacons = new SendingBeaconsState(this);
-    acceptTransmission = new AcceptTransmissionState(this);
-    requestTransmission = new RequestTransmissionState(this);
-    sendData = new SendDataState(this);
-    waitTransmissionRequest = new WaitTransmissionState(this);
-    savingData = new SavingDataState(this);
+    receiveParameters = new ReceiveParametersState(this);
+    sendParameters = new SendParametersState(this);
+    saveRecords = new SaveRecordsState(this);
+    sendRecords = new SendRecordsState(this);
 
     setStateToListeningBeacons();
     char *argv = {};
-    run(argv);
+    run();
 }
 
 TerminalMachine::~TerminalMachine(){
@@ -24,6 +23,7 @@ TerminalMachine::~TerminalMachine(){
     delete waitTransmissionRequest;
     delete savingData;
 }
+
 void TerminalMachine::setStateToListeningBeacons(){
     pCurrentState = listeningBeacons;
 }
@@ -32,30 +32,34 @@ void TerminalMachine::setStateToSendingBeacons(){
     pCurrentState = sendingBeacons;
 }
 
-void TerminalMachine::setStateToAcceptTransmission(){
-    pCurrentState = acceptTransmission;
+void TerminalMachine::setStateToReceiveParameters(){
+    pCurrentState = receiveParameters;
 }
 
-void TerminalMachine::setStateToRequestTransmission(){
-    pCurrentState = requestTransmission;
+void TerminalMachine::setStateToSendParameters(){
+    pCurrentState = sendParameters;
 }
 
-void TerminalMachine::setStateToSendData(){
-    pCurrentState = sendData;
+void TerminalMachine::setStateToSaveRecords(){
+    pCurrentState = saveRecords;
 }
 
-void TerminalMachine::setStateToWaitTransmissionRequest(){
-    pCurrentState = waitTransmissionRequest;
-}
-
-void TerminalMachine::setStateToSavingData(){
-    pCurrentState = savingData;
+void TerminalMachine::setStateToSendRecords(){
+    pCurrentState = sendRecords;
 }
 
 TerminalState *TerminalMachine::getCurrentState(){
     return pCurrentState;
 }
 
-void TerminalMachine::run(char **argv){
+void TerminalMachine::run(){
     pCurrentState->run(argv);
+}
+
+void TerminalMachine::setMessage(Message *messageObject){
+    pMessage = messageObject;
+}
+
+Message *TerminalMachine::getMessage(){
+    return pMessage;
 }

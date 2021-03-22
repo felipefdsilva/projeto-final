@@ -39,10 +39,10 @@ class Message{
     public:
         Message(unsigned);
         ~Message();
-        void generateMessage();
-        void readMessage();
-        uint8_t *getMessage();
-        void setMessage(uint8_t *message);
+        void convertFieldsArrayInBytes();
+        void convertMessageBytesInFields();
+        uint8_t *getMessageAsBytes();
+        void saveMessageAsBytes(uint8_t *message);
         unsigned getMessageSize();
         Field *getFields();
         unsigned getFieldCount();

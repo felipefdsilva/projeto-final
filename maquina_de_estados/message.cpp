@@ -108,7 +108,7 @@ Message::~Message(){
     delete pMessage;
 }
 /*converte um array de Fields no array de bytes para envio via LoRa*/
-void Message::generateMessage(){
+void Message::convertFieldsArrayInBytes(){
 	unsigned sumOfFieldSizes = 0;
 	unsigned j = 0;
 
@@ -122,7 +122,7 @@ void Message::generateMessage(){
 	}
 }
 /*converte um array de bytes em array de Fields*/
-void Message::readMessage(){
+void Message::convertMessageBytesInFields(){
     unsigned sumOfFieldSizes=0;
     unsigned j = 0;
 
@@ -136,7 +136,7 @@ void Message::readMessage(){
     }
 }
 /*Retorna a mensagem em array de bytes*/
-uint8_t *Message::getMessage(){
+uint8_t *Message::getMessageAsBytes(){
     for(unsigned i=0; i < pMessageSize; i++){
         pByteMessage[(i+1)*2-2] = (pMessage[i] & 0xff00) >> 8;
         pByteMessage[(i+1)*2-1] = pMessage[i] & 0x00ff;
@@ -144,7 +144,7 @@ uint8_t *Message::getMessage(){
     return pByteMessage;
 }
 /*Copia a messagem recebida para o atributo privado*/
-void Message::setMessage(uint8_t *message){
+void Message::saveMessageAsBytes(uint8_t *message){
     for(unsigned i=0; i < pMessageSize; i++){
         pMessage[i] = (uint16_t) message[(i+1)*2-2];
         pMessage[i] <<= BYTE;
