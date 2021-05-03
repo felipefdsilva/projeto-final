@@ -1,8 +1,8 @@
-#include "state_interface.h"
+#include "terminal_state.h"
 #include "message.h"
 
-#ifndef _CONTEXT_H_
-#define _CONTEXT_H_ "context.h"
+#ifndef _TERMINAL_MACHINE_H_
+#define _TERMINAL_MACHINE_H_ "terminal_machine.h"
 
 class TerminalMachine{
     public:
@@ -19,18 +19,30 @@ class TerminalMachine{
         void setStateToSaveRecords();
 
         TerminalState *getCurrentState();
-        void setMessage(Message *);
-        Message *getMessage();
+
+        void setRole(bool);
+        bool getRole();
+
+        void setPeer(uint16_t);
+        uint16_t getPeer();
+
+        void setHopCount(uint16_t);
+        utin16_t getHopCount();
+
+        void setMaxRecords(uint16_t);
+        uint16_t getMaxRecords();
+
+        void setChannel(uint16_t);
+        utin16_t getChannel();
+
         void run();
 
-    protected:
+    private:
         bool isFirst;
         uint16_t peerId;
         uint16_t hopCount;
         uint16_t maximumRecords;
         uint16_t channel;
-
-    private:
         TerminalState *pCurrentState;
         TerminalState *listeningBeacons;
         TerminalState *sendingBeacons;

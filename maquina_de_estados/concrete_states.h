@@ -1,4 +1,4 @@
-#include "state_interface.h"
+#include "terminal_state.h"
 
 #ifndef _CONCRETE_STATES_H_
 #define _CONCRETE_STATES_H_ "concrete_states.h"

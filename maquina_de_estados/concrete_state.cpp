@@ -1,8 +1,8 @@
 #include <RH_RF95.h>
 #include <SPI.h>
 
+#include "terminal_machine.h"
 #include "concrete_states.h"
-#include "context.h"
 #include "message.h"
 
 RH_RF95 rf95;
@@ -48,7 +48,7 @@ void ListeningBeaconsState::run(){
                 uint16_t terminal_id = beaconMessage().getFields()[2].getValue();
 
                 getTerminalMachine().setStateToSendParameters();
-                getTerminalMachine().run({(char *)terminal_id});
+                getTerminalMachine().run();
                 return;
             }
         }

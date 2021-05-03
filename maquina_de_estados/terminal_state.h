@@ -1,5 +1,5 @@
-#ifndef _INTERFACE_H_
-#define _INTERFACE_H_ "state_interface.h"
+#ifndef _TERMINAL_STATE_H_
+#define _TERMINAL_STATE_H_ "terminal_state.h"
 
 class TerminalState{
     public:

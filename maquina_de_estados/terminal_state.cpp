@@ -1,6 +1,6 @@
 
-#include "state_interface.h"
-#include "context.h"
+#include "terminal_machine.h"
+#include "terminal_state.h"
 
 TerminalMachine TerminalState::getTerminalMachine(){
     return *pTerminalMachine;
