@@ -1,4 +1,4 @@
-  
+
 /*
 * Deals with protocol message types
 * Felipe Ferreira
@@ -24,16 +24,25 @@
 #define PADDING_1_SIZE 1
 #define PADDING_2_SIZE 12
 
+//Tipos de mensagens
+#define TOTEN_BEACON 1
+#define TERMINAL_BEACON 2
+#define TX_RX 3
+#define RECORD 4
+#define GROUP_LEADER 5
+#define HELP 6
+#define RESCUE 7
+
 using namespace std;
 
 class Message{
     public:
         Message(unsigned);
         ~Message();
-        void generateMessage();
-        void readMessage();
-        uint8_t *getMessage();
-        void setMessage(uint8_t *message);
+        void convertFieldsArrayInBytes();
+        void convertMessageBytesInFields();
+        uint8_t *getMessageAsBytes();
+        void saveMessageAsBytes(uint8_t *message);
         unsigned getMessageSize();
         Field *getFields();
         unsigned getFieldCount();

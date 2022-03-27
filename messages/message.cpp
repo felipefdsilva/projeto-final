@@ -11,7 +11,7 @@ using namespace std;
 /*Construtor*/
 Message::Message(unsigned type){
     //Totem Beacon
-    if (type == 1){
+    if (type == TOTEN_BEACON){
         pFieldCount = 5;
         pMessageSize = 3;
         pFields = new Field[pFieldCount];
@@ -22,7 +22,7 @@ Message::Message(unsigned type){
         pFields[4].setSize(COORDINATE_SIZE);
     }
     //Terminal Beacon
-    else if (type == 2){
+    else if (type == TERMINAL_BEACON){
         pFieldCount = 5;
         pMessageSize = 3;
         pFields = new Field[pFieldCount];
@@ -33,7 +33,7 @@ Message::Message(unsigned type){
         pFields[4].setSize(COORDINATE_SIZE);
     }
     //Solict./Aceite TX
-    else if (type == 3){
+    else if (type == TX_RX){
         pFieldCount = 7;
         pMessageSize = 3;
         pFields = new Field[pFieldCount];
@@ -46,7 +46,7 @@ Message::Message(unsigned type){
         pFields[6].setSize(CHANNEL_SIZE);
     }
     //Registro
-    else if (type == 4){
+    else if (type == RECORD){
         pFieldCount = 9;
         pMessageSize = 6;
         pFields = new Field[pFieldCount];
@@ -61,7 +61,7 @@ Message::Message(unsigned type){
         pFields[8].setSize(PADDING_2_SIZE);
     }
     //Eleição de Lider de Grupo
-    else if (type == 5){
+    else if (type == GROUP_LEADER){
         pFieldCount = 5;
         pMessageSize = 2;
         pFields = new Field[pFieldCount];
@@ -72,7 +72,7 @@ Message::Message(unsigned type){
         pFields[4].setSize(PADDING_2_SIZE);
     }
     //Pedido de Socorro
-    else if (type == 6){
+    else if (type == HELP){
         pFieldCount = 9;
         pMessageSize = 6;
         pFields = new Field[pFieldCount];
@@ -108,7 +108,7 @@ Message::~Message(){
     delete pMessage;
 }
 /*converte um array de Fields no array de bytes para envio via LoRa*/
-void Message::generateMessage(){
+void Message::convertFieldsArrayInBytes(){
 	unsigned sumOfFieldSizes = 0;
 	unsigned j = 0;
 
@@ -122,7 +122,7 @@ void Message::generateMessage(){
 	}
 }
 /*converte um array de bytes em array de Fields*/
-void Message::readMessage(){
+void Message::convertMessageBytesInFields(){
     unsigned sumOfFieldSizes=0;
     unsigned j = 0;
 
@@ -136,7 +136,7 @@ void Message::readMessage(){
     }
 }
 /*Retorna a mensagem em array de bytes*/
-uint8_t *Message::getMessage(){
+uint8_t *Message::getMessageAsBytes(){
     for(unsigned i=0; i < pMessageSize; i++){
         pByteMessage[(i+1)*2-2] = (pMessage[i] & 0xff00) >> 8;
         pByteMessage[(i+1)*2-1] = pMessage[i] & 0x00ff;
@@ -144,7 +144,7 @@ uint8_t *Message::getMessage(){
     return pByteMessage;
 }
 /*Copia a messagem recebida para o atributo privado*/
-void Message::setMessage(uint8_t *message){
+void Message::saveMessageAsBytes(uint8_t *message){
     for(unsigned i=0; i < pMessageSize; i++){
         pMessage[i] = (uint16_t) message[(i+1)*2-2];
         pMessage[i] <<= BYTE;
@@ -161,9 +161,8 @@ Field *Message::getFields(){
 unsigned Message::getFieldCount(){
     return pFieldCount;
 }
-
 void Message::printMessage(){
-    uint8_t *byteMessage = this->getMessage();
+    uint8_t *byteMessage = this->getMessageAsBytes();
 
     for (unsigned i = 0; i < this->getMessageSize()*2; i++){
 		cout << byteMessage[i] << " ";

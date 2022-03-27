@@ -32,7 +32,7 @@ void ListeningBeaconsState::run(){
     //TODO: Implementar periodo em intervalo de tempo
     unsigned period = 100;
     unsigned t = 0;
-    
+
     while (t < period){
         message = listen();
 
