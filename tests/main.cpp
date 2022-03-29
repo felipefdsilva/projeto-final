@@ -6,6 +6,7 @@
 //#include "coordinate.h"
 #include "../messages/message.h"
 #include "../messages/field.h"
+#include "http_client.h"
 
 #define OK	0
 
@@ -27,6 +28,7 @@ int main (int argc, char **argv){
 	message.convertFieldsArrayInBytes();
 	cout << "Message to send: ";
 	message.printMessage();
+	sendMessageLocally(message.getMessageAsBytes(), message.getMessageSize()*2);
 
 	//Reception
 	cout << "\nReceiving Message" << endl;

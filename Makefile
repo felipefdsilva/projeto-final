@@ -1,5 +1,5 @@
 compile-test:
-	g++ -c -Wall messages/* tests/main.cpp
+	g++ -Wall -c messages/field.cpp messages/message.cpp tests/http_client.c tests/main.cpp
 
 linkedit-test:
 	g++ -Wall -o localTest *.o
@@ -8,4 +8,4 @@ run:
 	./localTest
 
 clean:
-	rm *.o
+	rm -rf *.o
