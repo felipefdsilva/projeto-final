@@ -8,6 +8,13 @@
 
 using namespace std;
 
+uint16_t getMessageType(uint8_t *message){
+	//É preciso ler o tipo da mensagem, nos primeiros 16 bits,
+    // para poder construir um objeto da classe Message
+	uint16_t messageChunk = (((uint16_t) message[0]) << 8) | message[1];
+	return Field(MSG_TYPE_SIZE).extract(&messageChunk);
+}
+
 /*Construtor*/
 Message::Message(unsigned type){
     //Totem Beacon
@@ -162,6 +169,7 @@ unsigned Message::getFieldCount(){
     return pFieldCount;
 }
 void Message::printMessage(){
+    cout << "Message to send: ";
     uint8_t *byteMessage = this->getMessageAsBytes();
 
     for (unsigned i = 0; i < this->getMessageSize()*2; i++){
@@ -170,6 +178,7 @@ void Message::printMessage(){
 	cout << endl;
 }
 void Message::printFieldValues(){
+    cout << "Field values: ";
 	for (unsigned i = 0; i < this->getFieldCount(); i++){
 		cout << this->getFields()[i].getValue() << " ";
 	}

@@ -35,6 +35,7 @@
 
 using namespace std;
 
+uint16_t getMessageType(uint8_t *);
 class Message{
     public:
         Message(unsigned);

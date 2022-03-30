@@ -1,11 +1,39 @@
-compile-test:
-	g++ -Wall -c messages/field.cpp messages/message.cpp tests/http_client.c tests/main.cpp
+.PHONY: messages sender receiver local-test clean
 
-linkedit-test:
-	g++ -Wall -o localTest *.o
+CC = g++
+LD = g++
+CFLAGS = -Wall
+LFLAGS = -Wall
 
-run:
-	./localTest
+MESSAGE_SRC = messages/message.cpp messages/field.cpp
+MESSAGE_OBJS = field.o message.o
 
-clean:
-	rm -rf *.o
+HTTP_SRC = tests/http.cpp
+HTTP_OBJS = http.o
+
+SENDER_SRC = tests/sender.cpp
+SENDER_OBJS = $(MESSAGE_OBJS) $(HTTP_OBJS) sender.o
+
+RECEIVER_SRC = tests/receiver.cpp
+RECEIVER_OBJS = $(MESSAGE_OBJS) $(HTTP_OBJS) receiver.o
+
+EXECS = messages sender receiver
+
+clean-objs:
+	rm -f *.o
+
+clean-execs:
+	rm -f $(EXECS)
+
+clean: clean-objs clean-execs
+
+sender:
+	$(CC) $(CFLAGS) -c $(MESSAGE_SRC) $(HTTP_SRC) $(SENDER_SRC)
+	$(LD) $(LFLAGS) -o $@ $(SENDER_OBJS)
+
+receiver:
+	$(CC) $(CFLAGS) -c $(MESSAGE_SRC) $(HTTP_SRC) $(RECEIVER_SRC)
+	$(LD) $(LFLAGS) -o $@ $(RECEIVER_OBJS)
+
+local-test:
+	$(EXECS)
