@@ -12,8 +12,8 @@ int main (int argc, char **argv){
 	//Reception
 	cout << "\nReceiving Message" << endl;
 
-    uint8_t *msg = NULL;
-    msg = receiveMessageLocally(msg);
+    uint8_t msg[6*2*BYTE];
+    receiveMessageLocally(msg);
 	Message receivedMessage(getMessageType(msg));
 	receivedMessage.saveMessageAsBytes(msg);
 

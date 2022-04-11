@@ -12,7 +12,7 @@
 #define PORT 8080
 #define LOCAL_IP_ADR "127.0.0.1"
 
-uint8_t *receiveMessageLocally(uint8_t *msg){
+void receiveMessageLocally(uint8_t *msg){
 	int server_fd, new_socket, valread;
 	struct sockaddr_in address;
 	int opt = 1;
@@ -49,7 +49,6 @@ uint8_t *receiveMessageLocally(uint8_t *msg){
     }
     valread = read(new_socket, msg, 1024);
 
-    return msg;
     // printf("%s\n", buffer);
     // send(new_socket, hello, strlen(hello), 0);
     // printf("Hello message sent\n");
@@ -79,7 +78,7 @@ int sendMessageLocally(unsigned char message[], unsigned msgSize){
 		return -1;
 	}
 	send(sock, message, msgSize, 0);
-	printf("Hello message sent\n");
+	printf("Message sent.\n");
 	valread = read(sock, buffer, 1024);
 	printf("%s\n", buffer);
 	return 0;
