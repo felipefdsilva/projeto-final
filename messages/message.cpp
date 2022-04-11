@@ -169,7 +169,6 @@ unsigned Message::getFieldCount(){
     return pFieldCount;
 }
 void Message::printMessage(){
-    cout << "Message to send: ";
     uint8_t *byteMessage = this->getMessageAsBytes();
 
     for (unsigned i = 0; i < this->getMessageSize()*2; i++){
@@ -178,7 +177,6 @@ void Message::printMessage(){
 	cout << endl;
 }
 void Message::printFieldValues(){
-    cout << "Field values: ";
 	for (unsigned i = 0; i < this->getFieldCount(); i++){
 		cout << this->getFields()[i].getValue() << " ";
 	}
