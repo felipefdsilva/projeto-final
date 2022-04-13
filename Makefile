@@ -2,8 +2,8 @@
 
 CC = g++
 LD = g++
-CFLAGS = -Wall
-LFLAGS = -Wall
+CFLAGS = -Wall -std=c++11
+LFLAGS = -Wall -std=c++11
 
 MESSAGE_SRC = messages/message.cpp messages/field.cpp
 MESSAGE_OBJS = field.o message.o

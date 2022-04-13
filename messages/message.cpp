@@ -94,7 +94,7 @@ Message::Message(unsigned type){
         pFields[8].setSize(PADDING_2_SIZE);
     }
     //Notificação de Resgate
-    else {
+    else if (type == RESCUE){
         pFieldCount = 7;
         pMessageSize = 4;
         pFields = new Field[pFieldCount];
@@ -105,6 +105,10 @@ Message::Message(unsigned type){
         pFields[4].setSize(COORDINATE_SIZE);
         pFields[5].setSize(HELP_FLAG_SIZE);
         pFields[6].setSize(PADDING_2_SIZE);
+    }
+    else {
+        cout << "Message type is " << type << endl;
+        throw invalid_argument("Not a valid message type");
     }
     pMessage = new uint16_t[pMessageSize];
     pByteMessage = new uint8_t[pMessageSize*2];
