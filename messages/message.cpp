@@ -15,8 +15,21 @@ uint16_t getMessageType(uint8_t *message){
 	return Field(MSG_TYPE_SIZE).extract(&messageChunk);
 }
 
-/*Construtor*/
-Message::Message(unsigned type){
+/*Construtor para mensagem em bytes*/
+Message::Message(uint8_t *byteMessage){
+    unsigned type = getMessageType(byteMessage);
+
+    buildMessageSchema(type);
+
+    saveMessageAsTwoBytesArray(byteMessage);
+    convertTwoBytesInFields();
+}
+/*Construtor para mensagem em Fields*/
+Message::Message(Field *fieldsMessage){
+
+}
+/*Sets message structure based on type*/
+void Message::buildMessageSchema(unsigned type){
     //Totem Beacon
     if (type == TOTEN_BEACON){
         pFieldCount = 5;
@@ -106,6 +119,7 @@ Message::Message(unsigned type){
         pFields[5].setSize(HELP_FLAG_SIZE);
         pFields[6].setSize(PADDING_2_SIZE);
     }
+    //Tipo invalido
     else {
         cout << "Message type is " << type << endl;
         throw invalid_argument("Not a valid message type");
@@ -119,7 +133,7 @@ Message::~Message(){
     delete pMessage;
 }
 /*converte um array de Fields no array de bytes para envio via LoRa*/
-void Message::convertFieldsArrayInBytes(){
+void Message::convertFieldsInTwoBytes(){
 	unsigned sumOfFieldSizes = 0;
 	unsigned j = 0;
 
@@ -133,7 +147,7 @@ void Message::convertFieldsArrayInBytes(){
 	}
 }
 /*converte um array de bytes em array de Fields*/
-void Message::convertMessageBytesInFields(){
+void Message::convertTwoBytesInFields(){
     unsigned sumOfFieldSizes=0;
     unsigned j = 0;
 
@@ -147,7 +161,7 @@ void Message::convertMessageBytesInFields(){
     }
 }
 /*Retorna a mensagem em array de bytes*/
-uint8_t *Message::getMessageAsBytes(){
+uint8_t *Message::getMessageAsBytesArray(){
     for(unsigned i=0; i < pMessageSize; i++){
         pByteMessage[(i+1)*2-2] = (pMessage[i] & 0xff00) >> 8;
         pByteMessage[(i+1)*2-1] = pMessage[i] & 0x00ff;
@@ -155,7 +169,7 @@ uint8_t *Message::getMessageAsBytes(){
     return pByteMessage;
 }
 /*Copia a messagem recebida para o atributo privado*/
-void Message::saveMessageAsBytes(uint8_t *message){
+void Message::saveMessageAsTwoBytesArray(uint8_t *message){
     for(unsigned i=0; i < pMessageSize; i++){
         pMessage[i] = (uint16_t) message[(i+1)*2-2];
         pMessage[i] <<= BYTE;
@@ -166,20 +180,24 @@ void Message::saveMessageAsBytes(uint8_t *message){
 unsigned Message::getMessageSize(){
     return pMessageSize;
 }
+/*Retorna a mensagem num array de Fields*/
 Field *Message::getFields(){
     return pFields;
 }
+/*Retorna número de campos da mensagem, tirando os enchimentos*/
 unsigned Message::getFieldCount(){
     return pFieldCount;
 }
+/*Imprime a mensagem como é enviada, em bytes*/
 void Message::printMessage(){
-    uint8_t *byteMessage = this->getMessageAsBytes();
+    uint8_t *byteMessage = this->getMessageAsBytesArray();
 
     for (unsigned i = 0; i < this->getMessageSize()*2; i++){
 		cout << byteMessage[i] << " ";
 	}
 	cout << endl;
 }
+/*Imprime a mensagem na sua representação por campos*/
 void Message::printFieldValues(){
 	for (unsigned i = 0; i < this->getFieldCount(); i++){
 		cout << this->getFields()[i].getValue() << " ";

@@ -38,18 +38,24 @@ using namespace std;
 uint16_t getMessageType(uint8_t *);
 class Message{
     public:
-        Message(unsigned);
+        Message(uint8_t *);
+        Message(Field *);
         ~Message();
-        void convertFieldsArrayInBytes();
-        void convertMessageBytesInFields();
-        uint8_t *getMessageAsBytes();
-        void saveMessageAsBytes(uint8_t *message);
+
+        void buildMessageSchema(unsigned);
+        void saveMessageAsTwoBytesArray(uint8_t *message);
+
+        unsigned getFieldCount();
         unsigned getMessageSize();
         Field *getFields();
-        unsigned getFieldCount();
+        uint8_t *getMessageAsBytesArray();
+
         void printMessage();
         void printFieldValues();
     private:
+        void convertFieldsInTwoBytes();
+        void convertTwoBytesInFields();
+
         Field *pFields;
         unsigned pFieldCount;
         uint16_t *pMessage;
