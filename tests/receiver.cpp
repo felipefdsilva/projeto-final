@@ -9,19 +9,16 @@
 using namespace std;
 
 int main (int argc, char **argv){
-	//Reception
-	cout << "\nReceiving Message" << endl;
+	cout << "Receiving Message" << endl;
 
     uint8_t msg[6*2*BYTE];
     receiveMessageLocally(msg);
-	Message receivedMessage(getMessageType(msg));
-	receivedMessage.saveMessageAsBytes(msg);
 
-	cout << "Received Message: ";
+	Message receivedMessage(msg);
+
+	cout << "Message as Bytes: ";
 	receivedMessage.printMessage();
-
-	receivedMessage.convertMessageBytesInFields(); //converte para Fields
-	cout << "Message Fields: ";
+	cout << "Message as Fields: ";
 	receivedMessage.printFieldValues();
 
 	return OK;

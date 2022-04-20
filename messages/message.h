@@ -39,7 +39,7 @@ uint16_t getMessageType(uint8_t *);
 class Message{
     public:
         Message(uint8_t *);
-        Message(Field *);
+        Message(uint16_t *);
         ~Message();
 
         void buildMessageSchema(unsigned);

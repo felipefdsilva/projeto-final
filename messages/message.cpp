@@ -22,11 +22,25 @@ Message::Message(uint8_t *byteMessage){
     buildMessageSchema(type);
 
     saveMessageAsTwoBytesArray(byteMessage);
+    pByteMessage = getMessageAsBytesArray();
     convertTwoBytesInFields();
 }
 /*Construtor para mensagem em Fields*/
-Message::Message(Field *fieldsMessage){
+Message::Message(uint16_t *fieldValues){
+    unsigned type = fieldValues[0];
 
+    buildMessageSchema(type);
+
+    for (unsigned i = 0; i < pFieldCount; i++){
+		pFields[i].setValue(fieldValues[i]);
+	}
+
+    convertFieldsInTwoBytes();
+}
+/*Destrutor*/
+Message::~Message(){
+    delete pFields;
+    delete pMessage;
 }
 /*Sets message structure based on type*/
 void Message::buildMessageSchema(unsigned type){
@@ -127,11 +141,6 @@ void Message::buildMessageSchema(unsigned type){
     pMessage = new uint16_t[pMessageSize];
     pByteMessage = new uint8_t[pMessageSize*2];
 }
-/*Destrutor*/
-Message::~Message(){
-    delete pFields;
-    delete pMessage;
-}
 /*converte um array de Fields no array de bytes para envio via LoRa*/
 void Message::convertFieldsInTwoBytes(){
 	unsigned sumOfFieldSizes = 0;
@@ -190,10 +199,8 @@ unsigned Message::getFieldCount(){
 }
 /*Imprime a mensagem como é enviada, em bytes*/
 void Message::printMessage(){
-    uint8_t *byteMessage = this->getMessageAsBytesArray();
-
-    for (unsigned i = 0; i < this->getMessageSize()*2; i++){
-		cout << byteMessage[i] << " ";
+    for (unsigned i = 0; i < pMessageSize*2; i++){
+		cout << pByteMessage[i] << " ";
 	}
 	cout << endl;
 }
