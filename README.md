@@ -4,10 +4,10 @@ Protocolo para monitoramento de visitantes de uma parque florestal utilizando Lo
 Próximos Passos:
 
 - ~~Aprimorar interface a classe Message~~
-  - A mensagem é representada de três formas
-    - array de fields
-    - array de 16 bits ou bytes duplos (?)
-    - array de bytes (forçada pela interface do RadioHead)
+  - ~~A mensagem é representada de três formas~~
+    - ~~array de fields~~
+    - ~~array de 16 bits ou bytes duplos (?)~~
+    - ~~array de bytes (forçada pela interface do RadioHead)~~
   - ~~Fazer um construtor para cada caso? Facilitaria?~~
   - ~~Melhorar nome das funções~~
   - ~~Encapsular melhor as conversões~~

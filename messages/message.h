@@ -23,6 +23,7 @@
 #define HELP_FLAG_SIZE 4
 #define PADDING_1_SIZE 1
 #define PADDING_2_SIZE 12
+#define MESSAGE_MAX_SIZE 6*2*BYTE
 
 //Tipos de mensagens
 #define TOTEN_BEACON 1

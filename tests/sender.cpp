@@ -27,7 +27,14 @@ int main (int argc, char **argv){
 	cout << "Message as Fields: ";
 	message.printFieldValues();
 
-	sendMessageLocally(message.getMessageAsBytesArray(), message.getMessageSize()*2);
+	LocalChannel channel(false);
+	channel.sendMessage(message.getMessageAsBytesArray(), message.getMessageSize()*2);
+
+	uint8_t msg[MESSAGE_MAX_SIZE];
+
+	channel.receiveMessage(msg, MESSAGE_MAX_SIZE);
+
+	cout << msg << endl;
 
 	return OK;
 }

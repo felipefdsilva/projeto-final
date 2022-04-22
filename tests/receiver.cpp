@@ -11,15 +11,20 @@ using namespace std;
 int main (int argc, char **argv){
 	cout << "Receiving Message" << endl;
 
-    uint8_t msg[6*2*BYTE];
-    receiveMessageLocally(msg);
+    uint8_t message[MESSAGE_MAX_SIZE];
 
-	Message receivedMessage(msg);
+	LocalChannel channel(true);
+    channel.receiveMessage(message, MESSAGE_MAX_SIZE);
+	Message rcvdMessage(message);
 
 	cout << "Message as Bytes: ";
-	receivedMessage.printMessage();
+	rcvdMessage.printMessage();
 	cout << "Message as Fields: ";
-	receivedMessage.printFieldValues();
+	rcvdMessage.printFieldValues();
+
+	cout << "Now, let's send a hello" << endl;
+
+	channel.sendMessage((uint8_t *) "hello", 5);
 
 	return OK;
 }

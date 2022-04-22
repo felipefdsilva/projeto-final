@@ -36,6 +36,7 @@ Message::Message(uint16_t *fieldValues){
 	}
 
     convertFieldsInTwoBytes();
+    getMessageAsBytesArray();
 }
 /*Destrutor*/
 Message::~Message(){

@@ -9,77 +9,116 @@
 
 #include "http.h"
 
-#define PORT 8080
-#define LOCAL_IP_ADR "127.0.0.1"
 
-void receiveMessageLocally(uint8_t *msg){
-	int server_fd, new_socket, valread;
+LocalChannel::LocalChannel(bool server){
+	createSocket();
+
+	if (server) {
+		setUpServer();
+	}
+	else {
+		connectToServer();
+	}
+}
+void LocalChannel::setUpServer(){
+	printf("Setting up server\n");
+
+	setSocketOptions();
+	struct sockaddr_in socketAddress = bindAddress();
+	awaitsConnectionRequest();
+	acceptConnection(socketAddress);
+}
+void LocalChannel::connectToServer(){
+	printf("Connecting to Server\n");
 	struct sockaddr_in address;
-	int opt = 1;
-	int addrlen = sizeof(address);
-	// uint8_t buffer[1024] = {0};
 
-	// Creating socket file descriptor
-	if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0){
-		perror("socket failed");
-		exit(EXIT_FAILURE);
+	address.sin_family = AF_INET;
+	address.sin_port = htons(PORT);
+
+	// Convert IPv4 and IPv6 addresses from text to binary form
+	if(inet_pton(AF_INET, LOCAL_IP_ADR, &(address.sin_addr))<=0){
+		printf("Invalid address/ Address not supported\n");
+		exit(-1);
 	}
 
-	// Configures socket to reuse adress and port
-	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt))){
+	if (connect(serverSocket, (struct sockaddr *)&address, sizeof(address)) < 0){
+		printf("Connection Failed\n");
+		exit(-1);
+	}
+}
+void LocalChannel::createSocket(){
+	printf("Creating Socket\n");
+
+	serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+
+	if(serverSocket < 0){
+		printf("Socket creation error\n");
+		exit(-1);
+	}
+}
+void LocalChannel::sendMessage(uint8_t *message, size_t messageSize){
+	printf("Sending message\n");
+
+	send(serverSocket, message, messageSize, 0);
+	printf("Message sent.\n");
+}
+void LocalChannel::setSocketOptions(){
+	printf("Configuring socket\n");
+
+	int opt = 1;
+	// Configures socket to reuse address and port
+	if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt))){
 		perror("setsockopt");
 		exit(EXIT_FAILURE);
 	}
-	address.sin_family = AF_INET;
-	address.sin_addr.s_addr = INADDR_ANY;
-	address.sin_port = htons(PORT);
+}
+struct sockaddr_in LocalChannel::bindAddress(){
+	printf("Binding socket address\n");
 
-	// Forcefully binding the socket to local ip address
-	if (bind(server_fd, (struct sockaddr *)&address, sizeof(address))<0){
+	struct sockaddr_in serverAddress;
+
+	serverAddress.sin_family = AF_INET;
+	serverAddress.sin_addr.s_addr = INADDR_ANY;
+	serverAddress.sin_port = htons(PORT);
+
+	// Forcefully binding the socket to local ip pAddress
+	unsigned bindStatus = bind(
+		serverSocket,
+		(struct sockaddr *)&serverAddress,
+		sizeof(serverAddress)
+	);
+	if (bindStatus < 0) {
 		perror("bind failed");
 		exit(EXIT_FAILURE);
 	}
-    if (listen(server_fd, 3) < 0){
+	return serverAddress;
+}
+void LocalChannel::awaitsConnectionRequest(){
+	printf("Awaiting connection request\n");
+
+    if (listen(serverSocket, 3) < 0){
         perror("listen");
         exit(EXIT_FAILURE);
     }
-    if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0){
+}
+void LocalChannel::acceptConnection(struct sockaddr_in socketAdress){
+	printf("Accepting request\n");
+
+	unsigned addressLength = sizeof(socketAdress);
+
+	peerSocket = accept(
+		serverSocket,
+		(struct sockaddr *) &socketAdress,
+		(socklen_t*) &addressLength
+	);
+
+	if (peerSocket<0){
         perror("accept");
         exit(EXIT_FAILURE);
     }
-    valread = read(new_socket, msg, 1024);
-
-    // printf("%s\n", buffer);
-    // send(new_socket, hello, strlen(hello), 0);
-    // printf("Hello message sent\n");
 }
+void LocalChannel::receiveMessage(uint8_t *message, size_t msgMaxSize){
+	printf("Receiving message\n");
 
-int sendMessageLocally(unsigned char message[], unsigned msgSize){
-	int sock = 0, valread;
-	struct sockaddr_in serv_addr;
-	char buffer[1024] = {0};
-
-	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0){
-		printf("\n Socket creation error \n");
-		return -1;
-	}
-
-	serv_addr.sin_family = AF_INET;
-	serv_addr.sin_port = htons(PORT);
-
-	// Convert IPv4 and IPv6 addresses from text to binary form
-	if(inet_pton(AF_INET, LOCAL_IP_ADR, &serv_addr.sin_addr)<=0){
-		printf("\nInvalid address/ Address not supported \n");
-		return -1;
-	}
-
-	if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0){
-		printf("\nConnection Failed \n");
-		return -1;
-	}
-	send(sock, message, msgSize, 0);
-	printf("Message sent.\n");
-	valread = read(sock, buffer, 1024);
-	printf("%s\n", buffer);
-	return 0;
+    read(peerSocket, message, msgMaxSize);
 }
