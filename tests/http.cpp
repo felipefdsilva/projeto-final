@@ -19,6 +19,7 @@ LocalChannel::LocalChannel(bool server){
 	else {
 		connectToServer();
 	}
+	pServer = server;
 }
 
 void LocalChannel::setUpServer(){
@@ -122,12 +123,23 @@ void LocalChannel::acceptConnection(struct sockaddr_in socketAdress){
 void LocalChannel::receiveMessage(uint8_t *message, size_t msgMaxSize){
 	printf("Receiving message\n");
 
-    read(peerSocket, message, msgMaxSize);
+	if(pServer){
+    	read(peerSocket, message, msgMaxSize);
+	}
+	else {
+		read(serverSocket, message, msgMaxSize);
+	}
 }
 
 void LocalChannel::sendMessage(uint8_t *message, size_t messageSize){
 	printf("Sending message\n");
 
-	send(serverSocket, message, messageSize, 0);
+	if(pServer){
+		send(peerSocket, message, messageSize, 0);
+	}
+	else {
+		send(serverSocket, message, messageSize, 0);
+	}
+
 	printf("Message sent.\n");
 }

@@ -17,7 +17,7 @@ SENDER_OBJS = $(MESSAGE_OBJS) $(HTTP_OBJS) sender.o
 RECEIVER_SRC = $(MESSAGE_SRC) $(HTTP_SRC) tests/receiver.cpp
 RECEIVER_OBJS = $(MESSAGE_OBJS) $(HTTP_OBJS) receiver.o
 
-EXECS = messages sender receiver
+EXECS = sender receiver
 
 clean-objs:
 	rm -f *.o

@@ -10,7 +10,7 @@
 using namespace std;
 
 int main (int argc, char **argv){
-	cout << "Sending Message" << endl;
+	cout << "Sending Terminam Beacon" << endl;
 	// uint16_t values[] = {TOTEN_BEACON, 0, 1, 41000, 38349};
 	uint16_t values[] = {TERMINAL_BEACON, 0, 150, 41920, 40349};
 	// uint16_t values[] = {TX_RX, 0, 248, 29000, 10, 12, 3};
@@ -28,13 +28,22 @@ int main (int argc, char **argv){
 	message.printFieldValues();
 
 	LocalChannel channel(false);
-	channel.sendMessage(message.getMessageAsBytesArray(), message.getMessageSize()*2);
+	channel.sendMessage(
+		message.getMessageAsBytesArray(),
+		message.getMessageSize()*2
+	);
 
+	cout << "Receiving  TX Request" << endl;
 	uint8_t msg[MESSAGE_MAX_SIZE];
-
 	channel.receiveMessage(msg, MESSAGE_MAX_SIZE);
 
-	cout << msg << endl;
+	Message rcvdMessage(msg);
+
+	cout << "Message as Bytes: ";
+	rcvdMessage.printMessage();
+	cout << "Message as Fields: ";
+	rcvdMessage.printFieldValues();
+
 
 	return OK;
 }

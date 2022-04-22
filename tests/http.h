@@ -6,7 +6,7 @@
 
 
 class LocalChannel{
-	public:
+    public:
         LocalChannel(bool);
         void receiveMessage(uint8_t *, size_t);
         void sendMessage(uint8_t *, size_t);
@@ -20,9 +20,10 @@ class LocalChannel{
         void setUpServer();
         void connectToServer();
 
-	private:
+    private:
         int serverSocket;
         int peerSocket;
+        bool pServer;
 };
 
 #endif

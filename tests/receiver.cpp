@@ -9,7 +9,7 @@
 using namespace std;
 
 int main (int argc, char **argv){
-	cout << "Receiving Message" << endl;
+	cout << "Receiving Terminal Beacon" << endl;
 
     uint8_t message[MESSAGE_MAX_SIZE];
 
@@ -22,9 +22,19 @@ int main (int argc, char **argv){
 	cout << "Message as Fields: ";
 	rcvdMessage.printFieldValues();
 
-	cout << "Now, let's send a hello" << endl;
+	cout << "Now, let's request TX" << endl;
+	uint16_t values[] = {TX_RX, 0, 248, 29000, 10, 12, 3};
+	Message toSendMessage(values);
 
-	channel.sendMessage((uint8_t *) "hello", 5);
+	cout << "Message as Bytes: ";
+	toSendMessage.printMessage();
+	cout << "Message as Fields: ";
+	toSendMessage.printFieldValues();
+
+	channel.sendMessage(
+		toSendMessage.getMessageAsBytesArray(),
+		toSendMessage.getMessageSize()*2
+	);
 
 	return OK;
 }
