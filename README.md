@@ -3,9 +3,10 @@ Protocolo para monitoramento de visitantes de uma parque florestal utilizando Lo
 
 Próximos Passos:
 
-- Aprimorar interface http para testes locais
-    - Entender como reutilizar o socket (?)
-    - Atualmente é fácil trocar um mensagem, para um mero reply utilizando as funções definidas "quebra" o código
+- Entender a melhor forma de debuggar o código
+  - Como omitir alguns prints depois de realizar os testes
+  - qual a melhor forma de fazer um teste unitario?
+    - é realmente necessário?
 
 - Testar troca de duas mensagens, com nós fazendo ambos os papeis (receiver e sender)
 - Implementar aos poucos a maquina de estados terminal x terminal
