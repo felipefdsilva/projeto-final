@@ -20,6 +20,7 @@ LocalChannel::LocalChannel(bool server){
 		connectToServer();
 	}
 }
+
 void LocalChannel::setUpServer(){
 	printf("Setting up server\n");
 
@@ -28,6 +29,7 @@ void LocalChannel::setUpServer(){
 	awaitsConnectionRequest();
 	acceptConnection(socketAddress);
 }
+
 void LocalChannel::connectToServer(){
 	printf("Connecting to Server\n");
 	struct sockaddr_in address;
@@ -38,14 +40,15 @@ void LocalChannel::connectToServer(){
 	// Convert IPv4 and IPv6 addresses from text to binary form
 	if(inet_pton(AF_INET, LOCAL_IP_ADR, &(address.sin_addr))<=0){
 		printf("Invalid address/ Address not supported\n");
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 
 	if (connect(serverSocket, (struct sockaddr *)&address, sizeof(address)) < 0){
 		printf("Connection Failed\n");
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 }
+
 void LocalChannel::createSocket(){
 	printf("Creating Socket\n");
 
@@ -53,15 +56,10 @@ void LocalChannel::createSocket(){
 
 	if(serverSocket < 0){
 		printf("Socket creation error\n");
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 }
-void LocalChannel::sendMessage(uint8_t *message, size_t messageSize){
-	printf("Sending message\n");
 
-	send(serverSocket, message, messageSize, 0);
-	printf("Message sent.\n");
-}
 void LocalChannel::setSocketOptions(){
 	printf("Configuring socket\n");
 
@@ -72,6 +70,7 @@ void LocalChannel::setSocketOptions(){
 		exit(EXIT_FAILURE);
 	}
 }
+
 struct sockaddr_in LocalChannel::bindAddress(){
 	printf("Binding socket address\n");
 
@@ -93,6 +92,7 @@ struct sockaddr_in LocalChannel::bindAddress(){
 	}
 	return serverAddress;
 }
+
 void LocalChannel::awaitsConnectionRequest(){
 	printf("Awaiting connection request\n");
 
@@ -101,6 +101,7 @@ void LocalChannel::awaitsConnectionRequest(){
         exit(EXIT_FAILURE);
     }
 }
+
 void LocalChannel::acceptConnection(struct sockaddr_in socketAdress){
 	printf("Accepting request\n");
 
@@ -117,8 +118,16 @@ void LocalChannel::acceptConnection(struct sockaddr_in socketAdress){
         exit(EXIT_FAILURE);
     }
 }
+
 void LocalChannel::receiveMessage(uint8_t *message, size_t msgMaxSize){
 	printf("Receiving message\n");
 
     read(peerSocket, message, msgMaxSize);
+}
+
+void LocalChannel::sendMessage(uint8_t *message, size_t messageSize){
+	printf("Sending message\n");
+
+	send(serverSocket, message, messageSize, 0);
+	printf("Message sent.\n");
 }
