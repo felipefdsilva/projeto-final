@@ -10,7 +10,7 @@
 using namespace std;
 
 int main (int argc, char **argv){
-	cout << "Sending Terminam Beacon" << endl;
+	cout << "Sending Terminal Beacon" << endl;
 	// uint16_t values[] = {TOTEN_BEACON, 0, 1, 41000, 38349};
 	uint16_t values[] = {TERMINAL_BEACON, 0, 150, 41920, 40349};
 	// uint16_t values[] = {TX_RX, 0, 248, 29000, 10, 12, 3};
