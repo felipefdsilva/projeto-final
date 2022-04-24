@@ -23,7 +23,11 @@
 #define HELP_FLAG_SIZE 4
 #define PADDING_1_SIZE 1
 #define PADDING_2_SIZE 12
-#define MESSAGE_MAX_SIZE 6*2*BYTE
+
+#define MESSAGE_MAX_SIZE_BITS 6*2*BYTE
+#define MESSAGE_MAX_SIZE_BYTES 6*2
+#define MESSAGE_MAX_SIZE_TWO_BYTES 6
+#define MAX_FIELD_COUNT 9
 
 //Tipos de mensagens
 #define TOTEN_BEACON 1
@@ -44,11 +48,8 @@ class Message{
         Message(uint16_t *);
         ~Message();
 
-        void messageDelete();
         void build(uint8_t *);
         void build(uint16_t *);
-        void reset(uint8_t *);
-        void reset(uint16_t *);
         void setFieldValues(uint16_t *);
         unsigned getFieldCount();
         unsigned getMessageSize();

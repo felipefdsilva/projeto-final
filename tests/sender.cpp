@@ -34,10 +34,10 @@ int main (int argc, char **argv){
 	);
 
 	cout << "Receiving  TX Request" << endl;
-	uint8_t msg[MESSAGE_MAX_SIZE];
-	channel.receiveMessage(msg, MESSAGE_MAX_SIZE);
+	uint8_t msg[MESSAGE_MAX_SIZE_BYTES];
+	channel.receiveMessage(msg, MESSAGE_MAX_SIZE_BYTES);
 
-	messageObj.reset(msg);
+	messageObj.build(msg);
 
 	cout << "Message as Bytes: ";
 	messageObj.printMessage();

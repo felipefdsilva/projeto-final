@@ -17,27 +17,27 @@ uint16_t getMessageType(uint8_t *message){
 
 /*Construtor para mensagem em bytes*/
 Message::Message(uint8_t *byteMessage){
+    pFields = new Field[MAX_FIELD_COUNT];
+    pMessage = new uint16_t[MESSAGE_MAX_SIZE_TWO_BYTES];
+    pByteMessage = new uint8_t[MESSAGE_MAX_SIZE_BYTES];
+
     build(byteMessage);
 }
 /*Construtor para mensagem em Fields*/
 Message::Message(uint16_t *fieldValues){
+    pFields = new Field[MAX_FIELD_COUNT];
+    pMessage = new uint16_t[MESSAGE_MAX_SIZE_TWO_BYTES];
+    pByteMessage = new uint8_t[MESSAGE_MAX_SIZE_BYTES];
+
     build(fieldValues);
 }
 /*Destrutor*/
 Message::~Message(){
-    messageDelete();
+    delete [] pFields;
+    delete [] pMessage;
+    delete [] pByteMessage;
 }
 /*Resets private attributes*/
-void Message::reset(uint8_t *byteMessage){
-    messageDelete();
-    build(byteMessage);
-}
-/*Resets private attributes*/
-void Message::reset(uint16_t *fieldValues){
-    messageDelete();
-    build(fieldValues);
-}
-/*Build schema and fills message*/
 void Message::build(uint8_t *byteMessage){
     unsigned type = getMessageType(byteMessage);
 
@@ -46,7 +46,7 @@ void Message::build(uint8_t *byteMessage){
     pByteMessage = getMessageAsBytesArray();
     convertTwoBytesInFields();
 }
-/*Buid schema and fills message*/
+/*Resets private attributes*/
 void Message::build(uint16_t *fieldValues){
     unsigned type = fieldValues[0];
 
@@ -60,19 +60,12 @@ void Message::setFieldValues(uint16_t *fieldValues){
     for (unsigned i = 0; i < pFieldCount; i++)
 		pFields[i].setValue(fieldValues[i]);
 }
-/*Delete pointer created with New clause*/
-void Message::messageDelete(){
-    delete [] pFields;
-    delete [] pMessage;
-    delete [] pByteMessage;
-}
 /*Sets message structure based on type*/
 void Message::buildMessageSchema(unsigned type){
     //Totem Beacon
     if (type == TOTEN_BEACON){
         pFieldCount = 5;
         pMessageSize = 3;
-        pFields = new Field[pFieldCount];
         pFields[0].setSize(MSG_TYPE_SIZE);
         pFields[1].setSize(PADDING_1_SIZE);
         pFields[2].setSize(DEVICE_ID_SIZE);
@@ -83,7 +76,6 @@ void Message::buildMessageSchema(unsigned type){
     else if (type == TERMINAL_BEACON){
         pFieldCount = 5;
         pMessageSize = 3;
-        pFields = new Field[pFieldCount];
         pFields[0].setSize(MSG_TYPE_SIZE);
         pFields[1].setSize(GROUP_FLAG_SIZE);
         pFields[2].setSize(DEVICE_ID_SIZE);
@@ -94,7 +86,6 @@ void Message::buildMessageSchema(unsigned type){
     else if (type == TX_RX){
         pFieldCount = 7;
         pMessageSize = 3;
-        pFields = new Field[pFieldCount];
         pFields[0].setSize(MSG_TYPE_SIZE);
         pFields[1].setSize(GROUP_FLAG_SIZE);
         pFields[2].setSize(DEVICE_ID_SIZE);
@@ -107,7 +98,6 @@ void Message::buildMessageSchema(unsigned type){
     else if (type == RECORD){
         pFieldCount = 9;
         pMessageSize = 6;
-        pFields = new Field[pFieldCount];
         pFields[0].setSize(MSG_TYPE_SIZE);
         pFields[1].setSize(GROUP_FLAG_SIZE);
         pFields[2].setSize(DEVICE_ID_SIZE);
@@ -122,7 +112,6 @@ void Message::buildMessageSchema(unsigned type){
     else if (type == GROUP_LEADER){
         pFieldCount = 5;
         pMessageSize = 2;
-        pFields = new Field[pFieldCount];
         pFields[0].setSize(MSG_TYPE_SIZE);
         pFields[1].setSize(GROUP_FLAG_SIZE);
         pFields[2].setSize(DEVICE_ID_SIZE);
@@ -133,7 +122,6 @@ void Message::buildMessageSchema(unsigned type){
     else if (type == HELP){
         pFieldCount = 9;
         pMessageSize = 6;
-        pFields = new Field[pFieldCount];
         pFields[0].setSize(MSG_TYPE_SIZE);
         pFields[1].setSize(PADDING_1_SIZE);
         pFields[2].setSize(DEVICE_ID_SIZE);
@@ -148,7 +136,6 @@ void Message::buildMessageSchema(unsigned type){
     else if (type == RESCUE){
         pFieldCount = 7;
         pMessageSize = 4;
-        pFields = new Field[pFieldCount];
         pFields[0].setSize(MSG_TYPE_SIZE);
         pFields[1].setSize(PADDING_1_SIZE);
         pFields[2].setSize(DEVICE_ID_SIZE);
@@ -162,8 +149,6 @@ void Message::buildMessageSchema(unsigned type){
         cout << "Message type is " << type << endl;
         throw invalid_argument("Not a valid message type");
     }
-    pMessage = new uint16_t[pMessageSize];
-    pByteMessage = new uint8_t[pMessageSize*2];
 }
 /*converte um array de Fields no array de bytes para envio via LoRa*/
 void Message::convertFieldsInTwoBytes(){
