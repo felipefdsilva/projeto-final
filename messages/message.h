@@ -37,26 +37,35 @@
 using namespace std;
 
 uint16_t getMessageType(uint8_t *);
+
 class Message{
     public:
         Message(uint8_t *);
         Message(uint16_t *);
         ~Message();
 
-        void buildMessageSchema(unsigned);
-        void saveMessageAsTwoBytesArray(uint8_t *message);
-
+        void messageDelete();
+        void build(uint8_t *);
+        void build(uint16_t *);
+        void reset(uint8_t *);
+        void reset(uint16_t *);
+        void setFieldValues(uint16_t *);
         unsigned getFieldCount();
         unsigned getMessageSize();
+
         Field *getFields();
         uint8_t *getMessageAsBytesArray();
 
         void printMessage();
         void printFieldValues();
-    private:
+
+    protected:
+        void buildMessageSchema(unsigned);
+        void saveMessageAsTwoBytesArray(uint8_t *message);
         void convertFieldsInTwoBytes();
         void convertTwoBytesInFields();
 
+    private:
         Field *pFields;
         unsigned pFieldCount;
         uint16_t *pMessage;

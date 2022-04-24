@@ -20,30 +20,29 @@ int main (int argc, char **argv){
 	// uint16_t values[] = {HELP, 1, 4095, 43233, 42346, 25908, 10123, 3, 0};
 	// uint16_t values[] = {RESCUE, 1, 4095, 42346, 25908, 3, 0};
 
-	Message message(values);
+	Message messageObj(values);
 
 	cout << "Message as Bytes: ";
-	message.printMessage();
+	messageObj.printMessage();
 	cout << "Message as Fields: ";
-	message.printFieldValues();
+	messageObj.printFieldValues();
 
 	LocalChannel channel(false);
 	channel.sendMessage(
-		message.getMessageAsBytesArray(),
-		message.getMessageSize()*2
+		messageObj.getMessageAsBytesArray(),
+		messageObj.getMessageSize()*2
 	);
 
 	cout << "Receiving  TX Request" << endl;
 	uint8_t msg[MESSAGE_MAX_SIZE];
 	channel.receiveMessage(msg, MESSAGE_MAX_SIZE);
 
-	Message rcvdMessage(msg);
+	messageObj.reset(msg);
 
 	cout << "Message as Bytes: ";
-	rcvdMessage.printMessage();
+	messageObj.printMessage();
 	cout << "Message as Fields: ";
-	rcvdMessage.printFieldValues();
-
+	messageObj.printFieldValues();
 
 	return OK;
 }

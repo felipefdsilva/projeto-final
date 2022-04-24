@@ -35,5 +35,4 @@ receiver:
 	$(CC) $(CFLAGS) -c $(RECEIVER_SRC)
 	$(LD) $(LFLAGS) -o $@ $(RECEIVER_OBJS)
 
-local-test:
-	$(EXECS)
+all: $(EXECS)

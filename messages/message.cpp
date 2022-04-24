@@ -17,31 +17,54 @@ uint16_t getMessageType(uint8_t *message){
 
 /*Construtor para mensagem em bytes*/
 Message::Message(uint8_t *byteMessage){
+    build(byteMessage);
+}
+/*Construtor para mensagem em Fields*/
+Message::Message(uint16_t *fieldValues){
+    build(fieldValues);
+}
+/*Destrutor*/
+Message::~Message(){
+    messageDelete();
+}
+/*Resets private attributes*/
+void Message::reset(uint8_t *byteMessage){
+    messageDelete();
+    build(byteMessage);
+}
+/*Resets private attributes*/
+void Message::reset(uint16_t *fieldValues){
+    messageDelete();
+    build(fieldValues);
+}
+/*Build schema and fills message*/
+void Message::build(uint8_t *byteMessage){
     unsigned type = getMessageType(byteMessage);
 
     buildMessageSchema(type);
-
     saveMessageAsTwoBytesArray(byteMessage);
     pByteMessage = getMessageAsBytesArray();
     convertTwoBytesInFields();
 }
-/*Construtor para mensagem em Fields*/
-Message::Message(uint16_t *fieldValues){
+/*Buid schema and fills message*/
+void Message::build(uint16_t *fieldValues){
     unsigned type = fieldValues[0];
 
     buildMessageSchema(type);
-
-    for (unsigned i = 0; i < pFieldCount; i++){
-		pFields[i].setValue(fieldValues[i]);
-	}
-
+    setFieldValues(fieldValues);
     convertFieldsInTwoBytes();
     getMessageAsBytesArray();
 }
-/*Destrutor*/
-Message::~Message(){
-    delete pFields;
-    delete pMessage;
+/*Sets Field Values*/
+void Message::setFieldValues(uint16_t *fieldValues){
+    for (unsigned i = 0; i < pFieldCount; i++)
+		pFields[i].setValue(fieldValues[i]);
+}
+/*Delete pointer created with New clause*/
+void Message::messageDelete(){
+    delete [] pFields;
+    delete [] pMessage;
+    delete [] pByteMessage;
 }
 /*Sets message structure based on type*/
 void Message::buildMessageSchema(unsigned type){

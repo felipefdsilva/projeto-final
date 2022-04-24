@@ -15,25 +15,25 @@ int main (int argc, char **argv){
 
 	LocalChannel channel(true);
     channel.receiveMessage(message, MESSAGE_MAX_SIZE);
-	Message rcvdMessage(message);
+	Message messageObj(message);
 
 	cout << "Message as Bytes: ";
-	rcvdMessage.printMessage();
+	messageObj.printMessage();
 	cout << "Message as Fields: ";
-	rcvdMessage.printFieldValues();
+	messageObj.printFieldValues();
 
 	cout << "Now, let's request TX" << endl;
 	uint16_t values[] = {TX_RX, 0, 248, 29000, 10, 12, 3};
-	Message toSendMessage(values);
+	messageObj.reset(values);
 
 	cout << "Message as Bytes: ";
-	toSendMessage.printMessage();
+	messageObj.printMessage();
 	cout << "Message as Fields: ";
-	toSendMessage.printFieldValues();
+	messageObj.printFieldValues();
 
 	channel.sendMessage(
-		toSendMessage.getMessageAsBytesArray(),
-		toSendMessage.getMessageSize()*2
+		messageObj.getMessageAsBytesArray(),
+		messageObj.getMessageSize()*2
 	);
 
 	return OK;
