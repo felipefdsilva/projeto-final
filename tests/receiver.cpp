@@ -9,11 +9,10 @@
 using namespace std;
 
 int main (int argc, char **argv){
-	cout << "Receiving Terminal Beacon" << endl;
-
     uint8_t message[MESSAGE_MAX_SIZE_BYTES];
-
 	LocalChannel channel(true);
+
+	cout << "Receiving Terminal Beacon" << endl;
     channel.receiveMessage(message, MESSAGE_MAX_SIZE_BYTES);
 	Message messageObj(message);
 

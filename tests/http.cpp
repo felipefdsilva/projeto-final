@@ -66,8 +66,23 @@ void LocalChannel::setSocketOptions(){
 
 	int opt = 1;
 	// Configures socket to reuse address and port
-	if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt))){
+	int status = setsockopt(
+		serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)
+	);
+	if (status) {
 		perror("setsockopt");
+		exit(EXIT_FAILURE);
+	}
+
+	struct timeval timeout;
+    timeout.tv_sec = 3;
+    timeout.tv_usec = 0;
+	// Configures socket to timeout
+	status = setsockopt(
+		serverSocket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)
+	);
+    if (status) {
+        perror("setsockopt failed at timeout");
 		exit(EXIT_FAILURE);
 	}
 }
