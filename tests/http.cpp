@@ -27,8 +27,17 @@ void LocalChannel::setUpServer(){
 
 	setSocketOptions();
 	struct sockaddr_in socketAddress = bindAddress();
-	awaitsConnectionRequest();
-	acceptConnection(socketAddress);
+	enableConnectionRequests();
+	int hasRequests = awaitsConnectionRequest();
+
+	if (!hasRequests) {
+		printf("Timed out\n");
+		connectToServer();
+		pServer = false;
+	}
+	else {
+		acceptConnection(socketAddress);
+	}
 }
 
 void LocalChannel::connectToServer(){
@@ -109,8 +118,8 @@ struct sockaddr_in LocalChannel::bindAddress(){
 	return serverAddress;
 }
 
-void LocalChannel::awaitsConnectionRequest(){
-	printf("Awaiting connection request\n");
+void LocalChannel::enableConnectionRequests(){
+	printf("Enabling connection requests\n");
 
     if (listen(serverSocket, 3) < 0){
         perror("listen");
@@ -118,9 +127,27 @@ void LocalChannel::awaitsConnectionRequest(){
     }
 }
 
-void LocalChannel::acceptConnection(struct sockaddr_in socketAdress){
-	printf("Accepting request\n");
+int LocalChannel::awaitsConnectionRequest(){
+	printf("Awaiting connection request\n");
 
+	fd_set selectFd;
+	struct timeval timeout;
+
+	timeout.tv_sec = 3;
+	timeout.tv_usec = 0;
+
+	int statusSelect = select(
+		serverSocket, &selectFd, NULL, NULL, &timeout
+	);
+
+	if (statusSelect < 0) {
+		perror("Failed awating for a connection request");
+		exit(EXIT_FAILURE);
+	}
+	return statusSelect;
+}
+
+void LocalChannel::acceptConnection(struct sockaddr_in socketAdress){
 	unsigned addressLength = sizeof(socketAdress);
 
 	peerSocket = accept(
@@ -130,9 +157,9 @@ void LocalChannel::acceptConnection(struct sockaddr_in socketAdress){
 	);
 
 	if (peerSocket<0){
-        perror("accept");
-        exit(EXIT_FAILURE);
-    }
+		perror("accept");
+		exit(EXIT_FAILURE);
+	}
 }
 
 void LocalChannel::receiveMessage(uint8_t *message, size_t msgMaxSize){

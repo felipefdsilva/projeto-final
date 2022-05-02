@@ -15,7 +15,8 @@ class LocalChannel{
         void createSocket();
         void setSocketOptions();
         struct sockaddr_in bindAddress();
-        void awaitsConnectionRequest();
+        int awaitsConnectionRequest();
+        void enableConnectionRequests();
         void acceptConnection(struct sockaddr_in);
         void setUpServer();
         void connectToServer();
