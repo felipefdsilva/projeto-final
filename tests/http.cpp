@@ -84,7 +84,7 @@ void LocalChannel::setSocketOptions(){
 	}
 
 	struct timeval timeout;
-    timeout.tv_sec = 3;
+    timeout.tv_sec = 5;
     timeout.tv_usec = 0;
 	// Configures socket to timeout
 	status = setsockopt(
@@ -133,12 +133,10 @@ int LocalChannel::awaitsConnectionRequest(){
 	fd_set selectFd;
 	struct timeval timeout;
 
-	timeout.tv_sec = 3;
+	timeout.tv_sec = 10;
 	timeout.tv_usec = 0;
 
-	int statusSelect = select(
-		serverSocket, &selectFd, NULL, NULL, &timeout
-	);
+	int statusSelect = select(serverSocket+1, &selectFd, NULL, NULL, &timeout);
 
 	if (statusSelect < 0) {
 		perror("Failed awating for a connection request");
@@ -148,6 +146,8 @@ int LocalChannel::awaitsConnectionRequest(){
 }
 
 void LocalChannel::acceptConnection(struct sockaddr_in socketAdress){
+	printf("Accepting connection\n");
+
 	unsigned addressLength = sizeof(socketAdress);
 
 	peerSocket = accept(
@@ -160,16 +160,29 @@ void LocalChannel::acceptConnection(struct sockaddr_in socketAdress){
 		perror("accept");
 		exit(EXIT_FAILURE);
 	}
+	struct timeval timeout;
+    timeout.tv_sec = 5;
+    timeout.tv_usec = 0;
+	// Configures socket to timeout
+	int status = setsockopt(
+		peerSocket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)
+	);
+    if (status) {
+        perror("setsockopt failed at timeout");
+		exit(EXIT_FAILURE);
+	}
 }
 
 void LocalChannel::receiveMessage(uint8_t *message, size_t msgMaxSize){
 	printf("Receiving message\n");
 
 	if(pServer){
-    	read(peerSocket, message, msgMaxSize);
+		// read(peerSocket, message, msgMaxSize);
+    	recv(peerSocket, message, msgMaxSize, 0);
 	}
 	else {
-		read(serverSocket, message, msgMaxSize);
+		// read(serverSocket, message, msgMaxSize);
+		recv(serverSocket, message, msgMaxSize, 0);
 	}
 }
 

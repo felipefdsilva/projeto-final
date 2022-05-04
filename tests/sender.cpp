@@ -28,10 +28,10 @@ int main (int argc, char **argv){
 	messageObj.printFieldValues();
 
 	LocalChannel channel(false);
-	channel.sendMessage(
-		messageObj.getMessageAsBytesArray(),
-		messageObj.getMessageSize()*2
-	);
+	// channel.sendMessage(
+	// 	messageObj.getMessageAsBytesArray(),
+	// 	messageObj.getMessageSize()*2
+	// );
 
 	cout << "Receiving  TX Request" << endl;
 	uint8_t msg[MESSAGE_MAX_SIZE_BYTES];
