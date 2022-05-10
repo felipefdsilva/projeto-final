@@ -12,6 +12,7 @@
 
 LocalChannel::LocalChannel(bool server){
 	createSocket();
+	pServer = server;
 
 	if (server) {
 		setUpServer();
@@ -19,7 +20,6 @@ LocalChannel::LocalChannel(bool server){
 	else {
 		connectToServer();
 	}
-	pServer = server;
 }
 
 void LocalChannel::setUpServer(){

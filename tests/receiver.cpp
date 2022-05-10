@@ -14,6 +14,12 @@ int main (int argc, char **argv){
 
 	cout << "Receiving Terminal Beacon" << endl;
     channel.receiveMessage(message, MESSAGE_MAX_SIZE_BYTES);
+
+	if (!message[0]) {
+		cout << "No message was received. Timed out" << endl;
+		cout << "You should start sending beacons!" << endl;
+		exit(1);
+	}
 	Message messageObj(message);
 
 	cout << "Message as Bytes: ";
